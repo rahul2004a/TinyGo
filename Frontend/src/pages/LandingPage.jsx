@@ -1,12 +1,15 @@
 import React from 'react'
 import Card from '../components/Card';
 import { motion } from "framer-motion";
-
+// import { ContextProvider } from '../contextApi/ContextApi.jsx';
+import { useStoreContext } from '../contextApi/ContextApi.jsx';
 let desc =
     "Generate short, memorable links with ease using TinyGo’s intuitive interface. Share URLs effortlessly across platforms. Optimize your sharing strategy with TinyGo. Track clicks and manage your links seamlessly to enhance your online presence. Generate short, memorable links with ease using TinyGo’s intuitive interface. Share URLs effortlessly across platforms.";
 
 
 const LandingPage = () => {
+    const { token } = useStoreContext();
+    console.log(token + " from landing page");
     return (
         <div className="min-h-[calc(100vh-64px)]  lg:px-14 sm:px-8 px-4">
             <div className="lg:flex-row flex-col    lg:py-5   pt-16   lg:gap-10 gap-8 flex justify-between items-center">

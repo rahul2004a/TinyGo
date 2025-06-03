@@ -6,12 +6,14 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Register from './pages/Register'
 import Loginpage from './pages/Loginpage'
+import { Toaster } from 'react-hot-toast'
 
 function App() {
 
   return (
     <>
       <Router>
+        <Toaster position='top-center' />
         <Navbar />
         <Routes>
           <Route path="/" element={<LandingPage />} />
