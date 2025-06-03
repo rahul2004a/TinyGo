@@ -25,7 +25,7 @@ const Graph = ({ graphData }) => {
 
     const data = {
         labels:
-            graphData.length > 0
+            graphData && graphData.length > 0
                 ? labels
                 : ["", "", "", "", "", "", "", "", "", "", "", "", "", ""],
         datasets: [
