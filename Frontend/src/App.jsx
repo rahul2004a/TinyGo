@@ -7,6 +7,7 @@ import Footer from './components/Footer'
 import Register from './pages/Register'
 import Loginpage from './pages/Loginpage'
 import { Toaster } from 'react-hot-toast'
+import DashboardLayout from './pages/Dashboard/DashboardLayout'
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
           <Route path='/about' element={<AboutPage />} />
           <Route path='/register' element={<Register />} />
           <Route path='/login' element={<Loginpage />} />
+          <Route path='/dashboard/*' element={<DashboardLayout />} />
         </Routes>
         <Footer />
       </Router>

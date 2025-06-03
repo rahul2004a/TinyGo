@@ -1,7 +1,6 @@
 import React from 'react'
 import Card from '../components/Card';
 import { motion } from "framer-motion";
-// import { ContextProvider } from '../contextApi/ContextApi.jsx';
 import { useStoreContext } from '../contextApi/ContextApi.jsx';
 let desc =
     "Generate short, memorable links with ease using TinyGo’s intuitive interface. Share URLs effortlessly across platforms. Optimize your sharing strategy with TinyGo. Track clicks and manage your links seamlessly to enhance your online presence. Generate short, memorable links with ease using TinyGo’s intuitive interface. Share URLs effortlessly across platforms.";
