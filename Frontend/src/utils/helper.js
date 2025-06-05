@@ -1,4 +1,4 @@
-import { subDomainList } from "./Constant.js";
+import { subDomainList } from "./Constant";
 
 export const getApps = () => {
   const subdomain = getSubDomain(window.location.hostname);

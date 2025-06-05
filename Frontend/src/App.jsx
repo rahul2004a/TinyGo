@@ -1,6 +1,6 @@
 import { BrowserRouter as Router } from 'react-router-dom'
 import './App.css'
-import { getApps } from './utils/Helper.js'
+import { getApps } from './utils/Helper'
 
 function App() {
   const CurrentApp = getApps();
