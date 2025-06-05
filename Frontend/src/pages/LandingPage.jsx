@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 
 import Card from '../components/Card';
 import { useStoreContext } from '../contextApi/ContextApi.jsx';
+import { Link } from 'react-router-dom';
 let desc =
     "Generate short, memorable links with ease using TinyGo’s intuitive interface. Share URLs effortlessly across platforms. Optimize your sharing strategy with TinyGo. Track clicks and manage your links seamlessly to enhance your online presence. Generate short, memorable links with ease using TinyGo’s intuitive interface. Share URLs effortlessly across platforms.";
 
@@ -42,7 +43,9 @@ const LandingPage = () => {
                             transition={{ duration: 0.8 }}
                             className="bg-custom-gradient  w-40 text-white rounded-md  py-2"
                         >
-                            Manage Links
+                            <Link to='/dashboard'>
+                                Manage Links
+                            </Link>
                         </motion.button>
                         <motion.button
                             initial={{ opacity: 0, y: 80 }}
@@ -54,7 +57,9 @@ const LandingPage = () => {
                             transition={{ duration: 0.8 }}
                             className="border-btnColor border w-40 text-btnColor rounded-md  py-2 "
                         >
-                            Create Short Link
+                            <Link to='/dashboard'>
+                                Create Short Link
+                            </Link>
                         </motion.button>
                     </div>
                 </div>
