@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import TextField from '../components/TextField'
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../api/api';
 import toast from 'react-hot-toast';
+import { useForm } from 'react-hook-form'
+import { Link, useNavigate } from 'react-router-dom';
+
+import api from '../api/api';
+import TextField from '../components/TextField'
 
 const RegisterPage = () => {
     const navigate = useNavigate();

@@ -81,9 +81,6 @@ const Graph = ({ graphData }) => {
             },
             x: {
                 beginAtZero: true,
-                // ticks: {
-                //   stepSize: 1,
-                // },
                 title: {
                     display: true,
                     text: "Date",

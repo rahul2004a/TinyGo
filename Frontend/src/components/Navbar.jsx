@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import { IoIosMenu } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
+
 import { useStoreContext } from "../contextApi/ContextApi";
 
 const Navbar = () => {

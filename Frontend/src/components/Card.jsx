@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+
 const Card = ({ title, desc }) => {
     return (
         <motion.div

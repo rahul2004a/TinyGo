@@ -1,15 +1,16 @@
 import { Route, Routes } from 'react-router-dom'
-import Navbar from './components/Navbar';
-import LandingPage from './pages/LandingPage';
-import AboutPage from './pages/AboutPage';
-import RegisterPage from './pages/Register';
-import LoginPage from './pages/Loginpage';
-import DashboardLayout from './pages/Dashboard/DashboardLayout';
-import Footer from './components/Footer';
 import { Toaster } from 'react-hot-toast';
-import ShortenUrlPage from './pages/ShortenUrlPage';
+
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import AboutPage from './pages/AboutPage';
+import LoginPage from './pages/Loginpage';
 import PrivateRoute from './PrivateRoute';
 import ErrorPage from './pages/ErrorPage';
+import RegisterPage from './pages/Register';
+import LandingPage from './pages/LandingPage';
+import ShortenUrlPage from './pages/ShortenUrlPage';
+import DashboardLayout from './pages/Dashboard/DashboardLayout';
 
 
 const AppRouter = () => {

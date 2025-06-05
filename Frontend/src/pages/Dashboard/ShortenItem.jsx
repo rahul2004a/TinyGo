@@ -1,24 +1,27 @@
 import React, { useEffect, useState } from 'react'
-import { FaExternalLinkAlt, FaRegCalendarAlt } from 'react-icons/fa';
-import { MdAnalytics, MdOutlineAdsClick } from 'react-icons/md';
+import { Link, useNavigate } from 'react-router-dom';
+
 import dayjs from 'dayjs';
 import { IoCopy } from 'react-icons/io5';
 import { LiaCheckSolid } from 'react-icons/lia';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import Graph from './Graph';
-import { useStoreContext } from '../../contextApi/ContextApi';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../../api/api';
 import { Hourglass } from 'react-loader-spinner';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { MdAnalytics, MdOutlineAdsClick } from 'react-icons/md';
+import { FaExternalLinkAlt, FaRegCalendarAlt } from 'react-icons/fa';
+
+import Graph from './Graph';
+import api from '../../api/api';
+import { useStoreContext } from '../../contextApi/ContextApi';
 
 const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate }) => {
     const { token } = useStoreContext();
     const navigate = useNavigate();
-    const [isCopied, setIsCopied] = useState(false);
-    const [analyticToggle, setAnalyticToggle] = useState(false);
+
     const [loader, setLoader] = useState(false);
+    const [isCopied, setIsCopied] = useState(false);
     const [selectedUrl, setSelectedUrl] = useState("");
     const [analyticsData, setAnalyticsData] = useState([]);
+    const [analyticToggle, setAnalyticToggle] = useState(false);
 
     const subDomain = import.meta.env.VITE_REACT_FRONT_END_URL.replace(
         /^https?:\/\//,

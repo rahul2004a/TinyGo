@@ -1,5 +1,6 @@
 import React from "react";
 import { FaLink, FaShareAlt, FaEdit, FaChartLine } from "react-icons/fa";
+
 const AboutPage = () => {
     return (
         <div className="lg:px-14 sm:px-8 px-5 min-h-[calc(100vh-64px)] pt-2">

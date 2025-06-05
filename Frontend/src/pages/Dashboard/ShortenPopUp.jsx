@@ -1,6 +1,5 @@
-import Modal from '@mui/material/Modal';
-
 import React from 'react'
+import Modal from '@mui/material/Modal';
 import CreateNewShorten from './CreateNewShorten';
 
 const ShortenPopUp = ({ open, setOpen, refetch }) => {

@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import TextField from '../components/TextField';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../api/api';
 import toast from 'react-hot-toast';
+import { useForm } from 'react-hook-form'
+import { Link, useNavigate } from 'react-router-dom';
+
+import api from '../api/api';
+import TextField from '../components/TextField';
 import { useStoreContext } from '../contextApi/ContextApi.jsx';
 
 const LoginPage = () => {
     const navigate = useNavigate();
-    const [loader, setLoader] = useState(false);
     const { setToken } = useStoreContext();
+    const [loader, setLoader] = useState(false);
 
     const {
         register,

@@ -1,17 +1,17 @@
 import React, { useState } from 'react'
-import Graph from './Graph'
-import { dummyData } from '../../dummydata/dummy'
-import { useStoreContext } from '../../contextApi/ContextApi'
-import { useFetchMyShortUrls, useFetchTotalClicks } from '../../hooks/useQuery'
-import Loader from '../../components/Loader'
-import ShortenPopUp from './ShortenPopUp'
-import ShortenUrlList from './ShortenUrlList'
 import { useNavigate } from 'react-router-dom'
 
+import Graph from './Graph'
+import ShortenPopUp from './ShortenPopUp'
+import Loader from '../../components/Loader'
+import ShortenUrlList from './ShortenUrlList'
+import { useStoreContext } from '../../contextApi/ContextApi'
+import { useFetchMyShortUrls, useFetchTotalClicks } from '../../hooks/useQuery'
+
 const DashboardLayout = () => {
+    const navigate = useNavigate();
     const { token } = useStoreContext();
     const [shortenPopUp, setShortenPopUp] = useState(false);
-    const navigate = useNavigate();
 
     const { isLoading, data: myShortenUrls, refetch } = useFetchMyShortUrls(token, onError)
 
