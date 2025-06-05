@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { FaLink } from 'react-icons/fa' // Add missing import
 
 import Graph from './Graph'
 import ShortenPopUp from './ShortenPopUp'
@@ -13,9 +14,9 @@ const DashboardLayout = () => {
     const { token } = useStoreContext();
     const [shortenPopUp, setShortenPopUp] = useState(false);
 
-    const { isLoading, data: myShortenUrls, refetch } = useFetchMyShortUrls(token, onError)
+    const { isLoading, data: myShortenUrls = [], refetch } = useFetchMyShortUrls(token, onError)
 
-    const { isLoading: loader, data: totalClicks, isError, error } = useFetchTotalClicks(token, onError)
+    const { isLoading: loader, data: totalClicks = [], isError, error } = useFetchTotalClicks(token, onError)
 
     function onError(error) {
         console.error("Error fetching data:", error);
@@ -56,7 +57,7 @@ const DashboardLayout = () => {
                         </button>
                     </div>
                     <div>
-                        {!isLoading && myShortenUrls.length === 0 ? (
+                        {!isLoading && (!myShortenUrls || myShortenUrls.length === 0) ? (
                             <div className="flex justify-center pt-16">
                                 <div className="flex gap-2 items-center justify-center  py-6 sm:px-8 px-5 rounded-md   shadow-lg  bg-gray-50">
                                     <h1 className="text-slate-800 font-montserrat   sm:text-[18px] text-[14px] font-semibold mb-1 ">
