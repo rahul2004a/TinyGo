@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import { Toaster } from 'react-hot-toast';
 import ShortenUrlPage from './pages/ShortenUrlPage';
 import PrivateRoute from './PrivateRoute';
+import ErrorPage from './pages/ErrorPage';
 
 
 const AppRouter = () => {
@@ -34,7 +35,8 @@ const AppRouter = () => {
                         <DashboardLayout />
                     </PrivateRoute>
                 } />
-
+                <Route path="/error" element={<ErrorPage />} />
+                <Route path='/*' element={<ErrorPage message="We can't seem to find the page you're looking for" />} />
             </Routes>
             <Footer />
         </>
