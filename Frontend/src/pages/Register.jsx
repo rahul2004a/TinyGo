@@ -62,7 +62,7 @@ const RegisterPage = () => {
                 {/* Register Form */}
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                     <form onSubmit={handleSubmit(registerHandler)} className="p-8 space-y-6">
-                        
+
                         {/* Username Field */}
                         <div className="space-y-2">
                             <label className="block text-sm font-semibold text-gray-700">
@@ -86,11 +86,10 @@ const RegisterPage = () => {
                                     })}
                                     type="text"
                                     placeholder="Choose a username"
-                                    className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${
-                                        errors.username 
-                                            ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500' 
+                                    className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${errors.username
+                                            ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
                                             : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
-                                    }`}
+                                        }`}
                                     disabled={loader}
                                 />
                                 {errors.username && (
@@ -120,11 +119,10 @@ const RegisterPage = () => {
                                     })}
                                     type="email"
                                     placeholder="Enter your email"
-                                    className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${
-                                        errors.email 
-                                            ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500' 
+                                    className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${errors.email
+                                            ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
                                             : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
-                                    }`}
+                                        }`}
                                     disabled={loader}
                                 />
                                 {errors.email && (
@@ -158,11 +156,10 @@ const RegisterPage = () => {
                                     })}
                                     type="password"
                                     placeholder="Create a secure password"
-                                    className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${
-                                        errors.password 
-                                            ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500' 
+                                    className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${errors.password
+                                            ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
                                             : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
-                                    }`}
+                                        }`}
                                     disabled={loader}
                                 />
                                 {errors.password && (
