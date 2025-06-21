@@ -33,13 +33,29 @@ const RegisterPage = () => {
             );
             reset();
             toast.success("Account created successfully! Please sign in.", {
-                position: "bottom-center",
+                position: "top-center",
                 duration: 3000,
             });
             navigate("/login");
         } catch (error) {
-            console.log(error);
-            toast.error(error.response?.data?.message || "Registration failed. Please try again.");
+            if (error.response) {
+                if (error.response.status === 409) {
+                    toast.error(error.response.data, {
+                        position: "top-center",
+                        duration: 3000,
+                    });
+                } else {
+                    toast.error(error.response.data || "Registration failed. Please try again.", {
+                        position: "top-center",
+                        duration: 3000,
+                    });
+                }
+            } else {
+                toast.error("Registration failed. Please try again.", {
+                    position: "top-center",
+                    duration: 3000,
+                });
+            }
         } finally {
             setLoader(false);
         }
@@ -87,8 +103,8 @@ const RegisterPage = () => {
                                     type="text"
                                     placeholder="Choose a username"
                                     className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${errors.username
-                                            ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
-                                            : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
+                                        ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
+                                        : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
                                         }`}
                                     disabled={loader}
                                 />
@@ -120,8 +136,8 @@ const RegisterPage = () => {
                                     type="email"
                                     placeholder="Enter your email"
                                     className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${errors.email
-                                            ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
-                                            : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
+                                        ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
+                                        : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
                                         }`}
                                     disabled={loader}
                                 />
@@ -157,8 +173,8 @@ const RegisterPage = () => {
                                     type="password"
                                     placeholder="Create a secure password"
                                     className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${errors.password
-                                            ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
-                                            : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
+                                        ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
+                                        : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
                                         }`}
                                     disabled={loader}
                                 />

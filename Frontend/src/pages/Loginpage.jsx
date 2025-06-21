@@ -32,18 +32,36 @@ const LoginPage = () => {
                 "/api/auth/public/login",
                 data
             );
-            console.log(response.token);
+            // console.log(response.token);
             setToken(response.token);
             localStorage.setItem("JWT_TOKEN", JSON.stringify(response.token));
             toast.success("Welcome back! Login successful!", {
-                position: "bottom-center",
+                position: "top-center",
                 duration: 3000,
             });
             reset();
             navigate("/dashboard");
         } catch (error) {
             console.log(error);
-            toast.error(error.response?.data?.message || "Login failed. Please check your credentials.");
+            if (error.response) {
+                if (error.response?.status === 401) {
+                    toast.error(error.response.data, {
+                        position: "top-center",
+                        duration: 3000,
+                    });
+                } else {
+                    toast.error("An error occurred. Please try again later.", {
+                        position: "top-center",
+                        duration: 3000,
+                    });
+                }
+            } else {
+                toast.error("Network error. Please check your connection.", {
+                    position: "top-center",
+                    duration: 3000,
+                });
+
+            }
         } finally {
             setLoader(false);
         }
@@ -87,8 +105,8 @@ const LoginPage = () => {
                                     type="text"
                                     placeholder="Enter your username"
                                     className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${errors.username
-                                            ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
-                                            : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
+                                        ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
+                                        : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
                                         }`}
                                     disabled={loader}
                                 />
@@ -120,8 +138,8 @@ const LoginPage = () => {
                                     type="password"
                                     placeholder="Enter your password"
                                     className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${errors.password
-                                            ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
-                                            : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
+                                        ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
+                                        : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
                                         }`}
                                     disabled={loader}
                                 />
