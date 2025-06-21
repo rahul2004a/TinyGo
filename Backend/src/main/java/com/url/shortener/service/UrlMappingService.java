@@ -14,8 +14,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.zip.CRC32;
 
 @Service
 public class UrlMappingService {
@@ -25,8 +25,11 @@ public class UrlMappingService {
     @Autowired
     private ClickEventRepository clickEventRepository;
 
+    private static final String BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    private static final int BASE = BASE62_ALPHABET.length();
+
     public UrlMappingDTO createShortUrl(String originalUrl, User user) {
-        String shortUrl = generateShortUrl();
+        String shortUrl = generateShortUrlWithCRC32(originalUrl);
 
         UrlMapping urlMapping = new UrlMapping();
         urlMapping.setOriginalUrl(originalUrl);
@@ -49,16 +52,49 @@ public class UrlMappingService {
         return urlMappingDTO;
     }
 
-    private String generateShortUrl() {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private String generateShortUrlWithCRC32(String originalUrl) {
+        String shortUrl = generateCRC32Hash(originalUrl);
+        int collisionCount = 0;
 
-        Random random = new Random();
-        StringBuilder shortUrl = new StringBuilder(8);
+        while (urlMappingRepository.findByShortUrl(shortUrl) != null) {
+            collisionCount++;
+            String modifiedUrl = originalUrl + "_collision_" + collisionCount;
+            shortUrl = generateCRC32Hash(modifiedUrl);
 
-        for (int i = 0; i < 8; i++) {
-            shortUrl.append(characters.charAt(random.nextInt(characters.length())));
+            if (collisionCount > 1000) {
+                shortUrl = generateCRC32Hash(originalUrl + System.currentTimeMillis());
+                break;
+            }
         }
-        return shortUrl.toString();
+
+        return shortUrl;
+    }
+
+    private String generateCRC32Hash(String input) {
+        CRC32 crc32 = new CRC32();
+        crc32.update(input.getBytes());
+        long crcValue = crc32.getValue();
+
+        // Convert to positive value and encode in Base62
+        return encodeBase62(Math.abs(crcValue));
+    }
+
+    private String encodeBase62(long number) {
+        if (number == 0) {
+            return String.valueOf(BASE62_ALPHABET.charAt(0));
+        }
+
+        StringBuilder encoded = new StringBuilder();
+        while (number > 0) {
+            encoded.insert(0, BASE62_ALPHABET.charAt((int) (number % BASE)));
+            number /= BASE;
+        }
+
+        while (encoded.length() < 7) {
+            encoded.insert(0, BASE62_ALPHABET.charAt(0));
+        }
+
+        return encoded.toString();
     }
 
     public List<UrlMappingDTO> getUrlByUser(User user) {
@@ -69,8 +105,8 @@ public class UrlMappingService {
 
     public List<ClickEventDTO> getClickEventByDate(String shortUrl, LocalDateTime start, LocalDateTime end) {
         UrlMapping urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
-        if(urlMapping!=null){
-            return clickEventRepository.findByUrlMappingAndClickDateBetween(urlMapping,start,end).stream()
+        if (urlMapping != null) {
+            return clickEventRepository.findByUrlMappingAndClickDateBetween(urlMapping, start, end).stream()
                     .collect(Collectors.groupingBy(click -> click.getClickDate().toLocalDate(), Collectors.counting()))
                     .entrySet().stream()
                     .map(entry -> {
@@ -86,15 +122,16 @@ public class UrlMappingService {
 
     public Map<LocalDate, Long> getTotalClicksByUserAndDate(User user, LocalDate start, LocalDate end) {
         List<UrlMapping> urlMappings = urlMappingRepository.findByUser(user);
-        List<ClickEvent> clickEvents = clickEventRepository.findByUrlMappingInAndClickDateBetween(urlMappings,start.atStartOfDay(),end.plusDays(1).atStartOfDay());
+        List<ClickEvent> clickEvents = clickEventRepository.findByUrlMappingInAndClickDateBetween(urlMappings,
+                start.atStartOfDay(), end.plusDays(1).atStartOfDay());
         return clickEvents.stream()
                 .collect(Collectors.groupingBy(click -> click.getClickDate().toLocalDate(), Collectors.counting()));
     }
 
     public UrlMapping getOriginalUrl(String shortUrl) {
         UrlMapping urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
-        if(urlMapping!=null){
-            urlMapping.setClickCount(urlMapping.getClickCount()+1);
+        if (urlMapping != null) {
+            urlMapping.setClickCount(urlMapping.getClickCount() + 1);
             urlMappingRepository.save(urlMapping);
 
             ClickEvent clickEvent = new ClickEvent();
