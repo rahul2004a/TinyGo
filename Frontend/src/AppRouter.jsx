@@ -15,7 +15,13 @@ import DashboardLayout from './pages/Dashboard/DashboardLayout';
 
 const AppRouter = () => {
     const location = useLocation();
-    const isRedirectRoute = /^\/[a-zA-Z0-9]+$/.test(location.pathname);
+    // Define known routes that should have navbar/footer
+    const knownRoutes = ['/about', '/dashboard', '/register', '/login', '/error'];
+    const isKnownRoute = knownRoutes.includes(location.pathname) || location.pathname === '/';
+
+    // Check if it's a short URL redirect route (6-8 characters, alphanumeric)
+    const isRedirectRoute = /^\/[a-zA-Z0-9]{6,8}$/.test(location.pathname) && !isKnownRoute;
+
     return (
         <>
             <Toaster position='top-center' />
