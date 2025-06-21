@@ -1,0 +1,174 @@
+/* Custom Toaster Styles */
+.react-hot-toast div[role="status"] {
+  animation: slideInDown 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  position: relative;
+  overflow: hidden;
+}
+
+.react-hot-toast div[role="status"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+  animation: shimmer 2s infinite;
+}
+
+.react-hot-toast div[role="status"]:hover::before {
+  left: 100%;
+}
+
+/* Success Toast Specific Styling */
+.react-hot-toast div[role="status"][data-type="success"] {
+  background: linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 
+    0 20px 25px -5px rgba(16, 185, 129, 0.3), 
+    0 10px 10px -5px rgba(16, 185, 129, 0.2),
+    0 0 0 1px rgba(16, 185, 129, 0.1) !important;
+}
+
+.react-hot-toast div[role="status"][data-type="success"]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  border-radius: 12px 12px 0 0;
+}
+
+/* Error Toast Specific Styling */
+.react-hot-toast div[role="status"][data-type="error"] {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%) !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+  box-shadow: 
+    0 20px 25px -5px rgba(239, 68, 68, 0.3), 
+    0 10px 10px -5px rgba(239, 68, 68, 0.2),
+    0 0 0 1px rgba(239, 68, 68, 0.1) !important;
+}
+
+.react-hot-toast div[role="status"][data-type="error"]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  border-radius: 12px 12px 0 0;
+}
+
+/* Loading Toast Specific Styling */
+.react-hot-toast div[role="status"][data-type="loading"] {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%) !important;
+  border: 1px solid rgba(59, 130, 246, 0.4) !important;
+  box-shadow: 
+    0 20px 25px -5px rgba(59, 130, 246, 0.3), 
+    0 10px 10px -5px rgba(59, 130, 246, 0.2),
+    0 0 0 1px rgba(59, 130, 246, 0.1) !important;
+}
+
+.react-hot-toast div[role="status"][data-type="loading"]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  border-radius: 12px 12px 0 0;
+  animation: loadingBar 1.5s ease-in-out infinite;
+}
+
+/* Custom Animations */
+@keyframes slideInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+  50% {
+    transform: translateY(5px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes loadingBar {
+  0% {
+    width: 0%;
+    opacity: 1;
+  }
+  50% {
+    width: 100%;
+    opacity: 0.8;
+  }
+  100% {
+    width: 100%;
+    opacity: 0.4;
+  }
+}
+
+/* Hover Effects */
+.react-hot-toast div[role="status"]:hover {
+  transform: translateY(-2px) scale(1.02);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced Icon Styling */
+.react-hot-toast div[role="status"] > div:first-child {
+  margin-right: 12px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Text Content Styling */
+.react-hot-toast div[role="status"] > div:last-child {
+  font-weight: 600;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Close Button */
+.react-hot-toast button {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 8px !important;
+  padding: 4px !important;
+  transition: all 0.2s ease !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.react-hot-toast button:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .react-hot-toast div[role="status"] {
+    max-width: 90vw !important;
+    margin: 0 auto !important;
+  }
+}

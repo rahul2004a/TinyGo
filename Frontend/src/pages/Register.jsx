@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaSpinner, FaUserPlus, FaLink } from 'react-icons/fa';
 
 import api from '../api/api';
+import { showToast } from '../utils/toast';
 
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -32,28 +32,24 @@ const RegisterPage = () => {
                 data
             );
             reset();
-            toast.success("Account created successfully! Please sign in.", {
-                position: "top-center",
+            showToast.success("Account created successfully! Please sign in.", {
                 duration: 3000,
             });
             navigate("/login");
         } catch (error) {
             if (error.response) {
                 if (error.response.status === 409) {
-                    toast.error(error.response.data, {
-                        position: "top-center",
-                        duration: 3000,
+                    showToast.error(error.response.data, {
+                        duration: 4000,
                     });
                 } else {
-                    toast.error(error.response.data || "Registration failed. Please try again.", {
-                        position: "top-center",
-                        duration: 3000,
+                    showToast.error(error.response.data || "Registration failed. Please try again.", {
+                        duration: 4000,
                     });
                 }
             } else {
-                toast.error("Registration failed. Please try again.", {
-                    position: "top-center",
-                    duration: 3000,
+                showToast.error("Registration failed. Please try again.", {
+                    duration: 4000,
                 });
             }
         } finally {

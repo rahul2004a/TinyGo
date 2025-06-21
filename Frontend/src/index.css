@@ -6,6 +6,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import custom toaster styles */
+@import './styles/toaster.css';
+
 @layer utilities {
   .animate-fadeIn {
     animation: fadeIn 0.6s ease-out forwards;

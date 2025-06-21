@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
-import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaSpinner, FaLink } from 'react-icons/fa';
 
 import api from '../api/api';
 import { useStoreContext } from '../contextApi/ContextApi.jsx';
+import { getUserFromToken } from '../utils/helper';
+import { showToast } from '../utils/toast';
 
 const LoginPage = () => {
     const navigate = useNavigate();
-    const { setToken } = useStoreContext();
+    const { setToken, setUser } = useStoreContext();
     const [loader, setLoader] = useState(false);
 
     const {
@@ -35,8 +36,15 @@ const LoginPage = () => {
             // console.log(response.token);
             setToken(response.token);
             localStorage.setItem("JWT_TOKEN", JSON.stringify(response.token));
-            toast.success("Welcome back! Login successful!", {
-                position: "top-center",
+
+            // Extract and set user information from token
+            const userInfo = getUserFromToken(response.token);
+            if (userInfo) {
+                setUser(userInfo);
+                localStorage.setItem("USER_DATA", JSON.stringify(userInfo));
+            }
+
+            showToast.success("Welcome back! Login successful!", {
                 duration: 3000,
             });
             reset();
@@ -45,22 +53,18 @@ const LoginPage = () => {
             console.log(error);
             if (error.response) {
                 if (error.response?.status === 401) {
-                    toast.error(error.response.data, {
-                        position: "top-center",
-                        duration: 3000,
+                    showToast.error(error.response.data, {
+                        duration: 4000,
                     });
                 } else {
-                    toast.error("An error occurred. Please try again later.", {
-                        position: "top-center",
-                        duration: 3000,
+                    showToast.error("An error occurred. Please try again later.", {
+                        duration: 4000,
                     });
                 }
             } else {
-                toast.error("Network error. Please check your connection.", {
-                    position: "top-center",
-                    duration: 3000,
+                showToast.error("Network error. Please check your connection.", {
+                    duration: 4000,
                 });
-
             }
         } finally {
             setLoader(false);

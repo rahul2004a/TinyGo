@@ -3,19 +3,22 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { IoIosMenu } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
+import { FaUser } from "react-icons/fa";
 
 import { useStoreContext } from "../contextApi/ContextApi";
 import Logo from "./Logo";
 
 const Navbar = () => {
     const navigate = useNavigate();
-    const { token, setToken } = useStoreContext();
+    const { token, setToken, user, setUser } = useStoreContext();
     const path = useLocation().pathname;
     const [navbarOpen, setNavbarOpen] = useState(false);
 
     const onLogOutHandler = () => {
         setToken(null);
+        setUser(null);
         localStorage.removeItem("JWT_TOKEN");
+        localStorage.removeItem("USER_DATA");
         navigate("/login");
     };
 
@@ -36,8 +39,8 @@ const Navbar = () => {
                         <Link
                             to="/"
                             className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ${path === "/"
-                                    ? "text-yellow-300 font-semibold"
-                                    : "text-gray-100 hover:text-yellow-300 hover:scale-105"
+                                ? "text-yellow-300 font-semibold"
+                                : "text-gray-100 hover:text-yellow-300 hover:scale-105"
                                 }`}
                         >
                             Home
@@ -49,8 +52,8 @@ const Navbar = () => {
                         <Link
                             to="/about"
                             className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ${path === "/about"
-                                    ? "text-yellow-300 font-semibold"
-                                    : "text-gray-100 hover:text-yellow-300 hover:scale-105"
+                                ? "text-yellow-300 font-semibold"
+                                : "text-gray-100 hover:text-yellow-300 hover:scale-105"
                                 }`}
                         >
                             About
@@ -63,8 +66,8 @@ const Navbar = () => {
                             <Link
                                 to="/dashboard"
                                 className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ${path === "/dashboard"
-                                        ? "text-yellow-300 font-semibold"
-                                        : "text-gray-100 hover:text-yellow-300 hover:scale-105"
+                                    ? "text-yellow-300 font-semibold"
+                                    : "text-gray-100 hover:text-yellow-300 hover:scale-105"
                                     }`}
                             >
                                 Dashboard
@@ -85,12 +88,20 @@ const Navbar = () => {
                                 Sign Up
                             </Link>
                         ) : (
-                            <button
-                                onClick={onLogOutHandler}
-                                className="inline-flex items-center px-6 py-2.5 border border-emerald-400 text-sm font-medium rounded-xl text-emerald-100 bg-emerald-800/50 backdrop-blur-sm hover:bg-emerald-700/50 hover:text-white hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                            >
-                                Log Out
-                            </button>
+                            <>
+                                <div className="flex items-center space-x-2 text-emerald-100">
+                                    <span className="text-sm font-medium">Hello,</span>
+                                    <span className="text-sm font-semibold text-yellow-300">
+                                        {user?.username || user?.email || "User"}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={onLogOutHandler}
+                                    className="inline-flex items-center px-6 py-2.5 border border-emerald-400 text-sm font-medium rounded-xl text-emerald-100 bg-emerald-800/50 backdrop-blur-sm hover:bg-emerald-700/50 hover:text-white hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                >
+                                    Log Out
+                                </button>
+                            </>
                         )}
                     </div>
 
@@ -116,8 +127,8 @@ const Navbar = () => {
                     <Link
                         to="/"
                         className={`block px-3 py-2.5 text-base font-medium rounded-lg transition-all duration-300 ${path === "/"
-                                ? "text-yellow-300 bg-yellow-500/10 border border-yellow-500/20"
-                                : "text-gray-100 hover:text-yellow-300 hover:bg-emerald-800/50"
+                            ? "text-yellow-300 bg-yellow-500/10 border border-yellow-500/20"
+                            : "text-gray-100 hover:text-yellow-300 hover:bg-emerald-800/50"
                             }`}
                         onClick={() => setNavbarOpen(false)}
                     >
@@ -127,8 +138,8 @@ const Navbar = () => {
                     <Link
                         to="/about"
                         className={`block px-3 py-2.5 text-base font-medium rounded-lg transition-all duration-300 ${path === "/about"
-                                ? "text-yellow-300 bg-yellow-500/10 border border-yellow-500/20"
-                                : "text-gray-100 hover:text-yellow-300 hover:bg-emerald-800/50"
+                            ? "text-yellow-300 bg-yellow-500/10 border border-yellow-500/20"
+                            : "text-gray-100 hover:text-yellow-300 hover:bg-emerald-800/50"
                             }`}
                         onClick={() => setNavbarOpen(false)}
                     >
@@ -139,8 +150,8 @@ const Navbar = () => {
                         <Link
                             to="/dashboard"
                             className={`block px-3 py-2.5 text-base font-medium rounded-lg transition-all duration-300 ${path === "/dashboard"
-                                    ? "text-yellow-300 bg-yellow-500/10 border border-yellow-500/20"
-                                    : "text-gray-100 hover:text-yellow-300 hover:bg-emerald-800/50"
+                                ? "text-yellow-300 bg-yellow-500/10 border border-yellow-500/20"
+                                : "text-gray-100 hover:text-yellow-300 hover:bg-emerald-800/50"
                                 }`}
                             onClick={() => setNavbarOpen(false)}
                         >
@@ -158,15 +169,25 @@ const Navbar = () => {
                                 Sign Up
                             </Link>
                         ) : (
-                            <button
-                                onClick={() => {
-                                    onLogOutHandler();
-                                    setNavbarOpen(false);
-                                }}
-                                className="block w-full text-center px-4 py-3 text-sm font-medium text-emerald-100 bg-emerald-800/50 border border-emerald-400 hover:bg-emerald-700/50 hover:text-white rounded-lg transition-all duration-300"
-                            >
-                                Log Out
-                            </button>
+                            <div className="space-y-3">
+                                {/* User info section - Mobile */}
+                                <div className="px-3 py-2 text-center">
+                                    <span className="text-emerald-200 text-sm">Hello, </span>
+                                    <span className="text-yellow-300 font-semibold text-sm">
+                                        {user?.username || user?.email || "User"}
+                                    </span>
+                                </div>
+
+                                <button
+                                    onClick={() => {
+                                        onLogOutHandler();
+                                        setNavbarOpen(false);
+                                    }}
+                                    className="block w-full text-center px-4 py-3 text-sm font-medium text-emerald-100 bg-emerald-800/50 border border-emerald-400 hover:bg-emerald-700/50 hover:text-white rounded-lg transition-all duration-300"
+                                >
+                                    Log Out
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>

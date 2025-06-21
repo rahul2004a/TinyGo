@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 
-import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import { RxCross2 } from 'react-icons/rx';
 import { FaLink, FaSpinner } from 'react-icons/fa';
@@ -9,6 +8,7 @@ import { Tooltip } from '@mui/material';
 import { useStoreContext } from '../../contextApi/ContextApi';
 import TextField from '../../components/TextField';
 import api from '../../api/api';
+import { showToast } from '../../utils/toast';
 
 const CreateNewShorten = ({ setOpen, refetch }) => {
     const { token } = useStoreContext();
@@ -39,10 +39,8 @@ const CreateNewShorten = ({ setOpen, refetch }) => {
 
             const shortenUrl = `${import.meta.env.VITE_REACT_FRONT_END_URL}/${res.shortUrl}`;
             navigator.clipboard.writeText(shortenUrl).then(() => {
-                toast.success("Short URL created and copied to clipboard!", {
-                    position: "bottom-center",
-                    className: "mb-5",
-                    duration: 3000,
+                showToast.tinygo("Short URL created and copied to clipboard!", "success", {
+                    duration: 4000,
                 });
             });
 
@@ -50,7 +48,7 @@ const CreateNewShorten = ({ setOpen, refetch }) => {
             reset();
             setOpen(false);
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to create short URL");
+            showToast.error(error.response?.data?.message || "Failed to create short URL");
         } finally {
             setLoading(false);
         }
@@ -101,8 +99,8 @@ const CreateNewShorten = ({ setOpen, refetch }) => {
                                 type="url"
                                 placeholder="https://example.com"
                                 className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${errors.originalUrl
-                                        ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
-                                        : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
+                                    ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
+                                    : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
                                     }`}
                                 disabled={loading}
                             />
