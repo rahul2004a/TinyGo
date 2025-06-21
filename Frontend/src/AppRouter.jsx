@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast';
 
 import Navbar from './components/Navbar';
@@ -14,10 +14,12 @@ import DashboardLayout from './pages/Dashboard/DashboardLayout';
 
 
 const AppRouter = () => {
+    const location = useLocation();
+    const isRedirectRoute = /^\/[a-zA-Z0-9]+$/.test(location.pathname);
     return (
         <>
             <Toaster position='top-center' />
-            <Navbar />
+            {!isRedirectRoute && <Navbar />}
             <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path='/about' element={<AboutPage />} />
@@ -38,8 +40,9 @@ const AppRouter = () => {
                 } />
                 <Route path="/error" element={<ErrorPage />} />
                 <Route path='/*' element={<ErrorPage message="We can't seem to find the page you're looking for" />} />
+                <Route path="/:url" element={<ShortenUrlPage />} />
             </Routes>
-            <Footer />
+            {!isRedirectRoute && <Footer />}
         </>
     );
 }
