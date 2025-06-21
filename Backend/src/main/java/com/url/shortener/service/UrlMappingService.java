@@ -1,5 +1,6 @@
 package com.url.shortener.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.url.shortener.dtos.ClickEventDTO;
 import com.url.shortener.dtos.UrlMappingDTO;
 import com.url.shortener.models.ClickEvent;
@@ -9,25 +10,38 @@ import com.url.shortener.repository.ClickEventRepository;
 import com.url.shortener.repository.UrlMappingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.redis.core.RedisTemplate;
+import java.util.concurrent.TimeUnit;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 
 @Service
-public class UrlMappingService {
+public class UrlMappingService implements Serializable {
     @Autowired
     private UrlMappingRepository urlMappingRepository;
 
     @Autowired
     private ClickEventRepository clickEventRepository;
 
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private static final String URL_CACHE_PREFIX = "shorturl:";
+
     private static final String BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final int BASE = BASE62_ALPHABET.length();
 
+    @Transactional
     public UrlMappingDTO createShortUrl(String originalUrl, User user) {
         String shortUrl = generateShortUrlWithCRC32(originalUrl);
 
@@ -36,6 +50,8 @@ public class UrlMappingService {
         urlMapping.setShortUrl(shortUrl);
         urlMapping.setUser(user);
         urlMapping.setLocalDate(LocalDateTime.now());
+
+        redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, urlMapping, 1, TimeUnit.DAYS);
 
         UrlMapping savedUrlMapping = urlMappingRepository.save(urlMapping);
         return convertToDto(savedUrlMapping);
@@ -129,7 +145,41 @@ public class UrlMappingService {
     }
 
     public UrlMapping getOriginalUrl(String shortUrl) {
-        UrlMapping urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+        Object cached = redisTemplate.opsForValue().get(URL_CACHE_PREFIX + shortUrl);
+
+        UrlMapping urlMapping = null;
+        if (cached instanceof UrlMapping) {
+            urlMapping = (UrlMapping) cached;
+        } else if (cached instanceof LinkedHashMap) {
+            urlMapping = objectMapper.convertValue(cached, UrlMapping.class);
+        }
+
+        if (urlMapping != null) {
+            if (urlMapping.getId() == null) {
+                urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+                if (urlMapping == null) {
+                    return null;
+                }
+            } else {
+                urlMapping = urlMappingRepository.findById(urlMapping.getId())
+                        .orElse(null);
+                if (urlMapping == null) {
+                    return null;
+                }
+            }
+
+            urlMapping.setClickCount(urlMapping.getClickCount() + 1);
+            urlMappingRepository.save(urlMapping);
+
+            ClickEvent clickEvent = new ClickEvent();
+            clickEvent.setClickDate(LocalDateTime.now());
+            clickEvent.setUrlMapping(urlMapping);
+            clickEventRepository.save(clickEvent);
+
+            return urlMapping;
+        }
+
+        urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
         if (urlMapping != null) {
             urlMapping.setClickCount(urlMapping.getClickCount() + 1);
             urlMappingRepository.save(urlMapping);
@@ -138,6 +188,8 @@ public class UrlMappingService {
             clickEvent.setClickDate(LocalDateTime.now());
             clickEvent.setUrlMapping(urlMapping);
             clickEventRepository.save(clickEvent);
+
+            redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, urlMapping, 1, TimeUnit.DAYS);
         }
         return urlMapping;
     }
