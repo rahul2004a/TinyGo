@@ -20,6 +20,7 @@ export default {
       fontFamily: {
         roboto: ["Roboto", "sans-serif"],
         montserrat: ["Montserrat"],
+        inter: ["Inter", "system-ui", "sans-serif"],
       },
     },
   },

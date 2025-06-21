@@ -5,6 +5,7 @@ import { IoIosMenu } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 
 import { useStoreContext } from "../contextApi/ContextApi";
+import Logo from "./Logo";
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -19,74 +20,158 @@ const Navbar = () => {
     };
 
     return (
-        <div className="h-16 bg-custom-gradient  z-50 flex items-center sticky top-0 ">
-            <div className="lg:px-14 sm:px-8 px-4 w-full flex justify-between">
-                <Link to="/">
-                    <h1 className="font-bold text-3xl text-white italic sm:mt-0 mt-2">
-                        Linklytics
-                    </h1>
-                </Link>
-                <ul
-                    className={`flex sm:gap-10 gap-4 sm:items-center sm:mt-1 sm:pt-0 pt-3 text-slate-800 sm:static absolute left-0 top-[62px] sm:shadow-none shadow-md ${navbarOpen ? "h-fit sm:pb-0 pb-5" : "h-0 overflow-hidden"
-                        }  transition-all duration-100 sm:h-fit sm:bg-none  bg-custom-gradient sm:w-fit w-full sm:flex-row flex-col px-4 sm:px-0`}
-                >
-                    <li className="hover:text-btnColor font-[500]  transition-all duration-150">
+        <nav className="bg-gradient-to-r from-emerald-600 via-teal-700 to-cyan-800 backdrop-blur-md border-b border-emerald-400/20 sticky top-0 z-50 shadow-lg">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-16">
+                    {/* Logo */}
+                    <Link
+                        to="/"
+                        className="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-200"
+                    >
+                        <Logo className="h-8" />
+                    </Link>
+
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center space-x-8">
                         <Link
-                            className={`${path === "/" ? "text-white font-semibold" : "text-gray-200"
-                                }`}
                             to="/"
+                            className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ${path === "/"
+                                    ? "text-yellow-300 font-semibold"
+                                    : "text-gray-100 hover:text-yellow-300 hover:scale-105"
+                                }`}
                         >
                             Home
+                            {path === "/" && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-md shadow-yellow-400/50"></div>
+                            )}
                         </Link>
-                    </li>
-                    <li className="hover:text-btnColor font-[500]  transition-all duration-150">
+
                         <Link
-                            className={`${path === "/about" ? "text-white font-semibold" : "text-gray-200"
-                                }`}
                             to="/about"
+                            className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ${path === "/about"
+                                    ? "text-yellow-300 font-semibold"
+                                    : "text-gray-100 hover:text-yellow-300 hover:scale-105"
+                                }`}
                         >
                             About
+                            {path === "/about" && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-md shadow-yellow-400/50"></div>
+                            )}
                         </Link>
-                    </li>
-                    {token && (
-                        <li className="hover:text-btnColor font-[500]  transition-all duration-150">
+
+                        {token && (
                             <Link
-                                className={`${path === "/dashboard" ? "text-white font-semibold" : "text-gray-200"
-                                    }`}
                                 to="/dashboard"
+                                className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ${path === "/dashboard"
+                                        ? "text-yellow-300 font-semibold"
+                                        : "text-gray-100 hover:text-yellow-300 hover:scale-105"
+                                    }`}
                             >
                                 Dashboard
+                                {path === "/dashboard" && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-md shadow-yellow-400/50"></div>
+                                )}
                             </Link>
-                        </li>
-                    )}
-                    {!token && (
-                        <Link to="/register">
-                            <li className=" sm:ml-0 -ml-1 bg-rose-700 text-white  cursor-pointer w-24 text-center font-semibold px-2 py-2 rounded-md  hover:text-slate-300   transition-all duration-150">
-                                SignUp
-                            </li>
+                        )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="hidden md:flex items-center space-x-4">
+                        {!token ? (
+                            <Link
+                                to="/register"
+                                className="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 hover:from-orange-600 hover:via-red-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-orange-500/25 transform hover:-translate-y-0.5"
+                            >
+                                Sign Up
+                            </Link>
+                        ) : (
+                            <button
+                                onClick={onLogOutHandler}
+                                className="inline-flex items-center px-6 py-2.5 border border-emerald-400 text-sm font-medium rounded-xl text-emerald-100 bg-emerald-800/50 backdrop-blur-sm hover:bg-emerald-700/50 hover:text-white hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                            >
+                                Log Out
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Mobile menu button */}
+                    <div className="md:hidden">
+                        <button
+                            onClick={() => setNavbarOpen(!navbarOpen)}
+                            className="inline-flex items-center justify-center p-2 rounded-lg text-gray-100 hover:text-yellow-300 hover:bg-emerald-800/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500 transition-all duration-300"
+                        >
+                            {navbarOpen ? (
+                                <RxCross2 className="h-6 w-6" />
+                            ) : (
+                                <IoIosMenu className="h-6 w-6" />
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Navigation Menu */}
+            <div className={`md:hidden ${navbarOpen ? 'block' : 'hidden'}`}>
+                <div className="px-4 pt-2 pb-3 space-y-1 bg-gradient-to-b from-emerald-700/95 to-teal-800/95 backdrop-blur-md border-t border-emerald-400/20">
+                    <Link
+                        to="/"
+                        className={`block px-3 py-2.5 text-base font-medium rounded-lg transition-all duration-300 ${path === "/"
+                                ? "text-yellow-300 bg-yellow-500/10 border border-yellow-500/20"
+                                : "text-gray-100 hover:text-yellow-300 hover:bg-emerald-800/50"
+                            }`}
+                        onClick={() => setNavbarOpen(false)}
+                    >
+                        Home
+                    </Link>
+
+                    <Link
+                        to="/about"
+                        className={`block px-3 py-2.5 text-base font-medium rounded-lg transition-all duration-300 ${path === "/about"
+                                ? "text-yellow-300 bg-yellow-500/10 border border-yellow-500/20"
+                                : "text-gray-100 hover:text-yellow-300 hover:bg-emerald-800/50"
+                            }`}
+                        onClick={() => setNavbarOpen(false)}
+                    >
+                        About
+                    </Link>
+
+                    {token && (
+                        <Link
+                            to="/dashboard"
+                            className={`block px-3 py-2.5 text-base font-medium rounded-lg transition-all duration-300 ${path === "/dashboard"
+                                    ? "text-yellow-300 bg-yellow-500/10 border border-yellow-500/20"
+                                    : "text-gray-100 hover:text-yellow-300 hover:bg-emerald-800/50"
+                                }`}
+                            onClick={() => setNavbarOpen(false)}
+                        >
+                            Dashboard
                         </Link>
                     )}
 
-                    {token && (
-                        <button
-                            onClick={onLogOutHandler}
-                            className="sm:ml-0 -ml-1 bg-rose-700 text-white  cursor-pointer w-24 text-center font-semibold px-2 py-2 rounded-md  hover:text-slate-300   transition-all duration-150">
-                            LogOut
-                        </button>
-                    )}
-                </ul>
-                <button
-                    onClick={() => setNavbarOpen(!navbarOpen)}
-                    className="sm:hidden flex items-center sm:mt-0 mt-2"
-                >
-                    {navbarOpen ? (
-                        <RxCross2 className="text-white text-3xl" />
-                    ) : (
-                        <IoIosMenu className="text-white text-3xl" />
-                    )}
-                </button>
+                    <div className="pt-3 border-t border-emerald-500/30">
+                        {!token ? (
+                            <Link
+                                to="/register"
+                                className="block w-full text-center px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded-lg transition-all duration-300 shadow-lg"
+                                onClick={() => setNavbarOpen(false)}
+                            >
+                                Sign Up
+                            </Link>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    onLogOutHandler();
+                                    setNavbarOpen(false);
+                                }}
+                                className="block w-full text-center px-4 py-3 text-sm font-medium text-emerald-100 bg-emerald-800/50 border border-emerald-400 hover:bg-emerald-700/50 hover:text-white rounded-lg transition-all duration-300"
+                            >
+                                Log Out
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
-        </div>
+        </nav>
     );
 };
 
