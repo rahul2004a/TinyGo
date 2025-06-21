@@ -12,10 +12,15 @@ const ShortenPopUp = ({ open, setOpen, refetch }) => {
         <Modal
             open={open}
             onClose={handleClose}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
+            aria-labelledby="create-short-url-modal"
+            aria-describedby="create-short-url-form"
+            className="flex justify-center items-center p-4"
+            style={{
+                backdropFilter: 'blur(8px)',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)'
+            }}
         >
-            <div className='flex justify-center items-center h-full w-full'>
+            <div className="outline-none">
                 <CreateNewShorten setOpen={setOpen} refetch={refetch} />
             </div>
         </Modal>

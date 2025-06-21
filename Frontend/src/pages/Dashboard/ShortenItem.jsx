@@ -7,13 +7,13 @@ import { LiaCheckSolid } from 'react-icons/lia';
 import { Hourglass } from 'react-loader-spinner';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { MdAnalytics, MdOutlineAdsClick } from 'react-icons/md';
-import { FaExternalLinkAlt, FaRegCalendarAlt } from 'react-icons/fa';
+import { FaExternalLinkAlt, FaRegCalendarAlt, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 import Graph from './Graph';
 import api from '../../api/api';
 import { useStoreContext } from '../../contextApi/ContextApi';
 
-const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate }) => {
+const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate, index }) => {
     const { token } = useStoreContext();
     const navigate = useNavigate();
 
@@ -58,111 +58,177 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate }) => {
         }
     }
 
-
     useEffect(() => {
         if (selectedUrl) {
             fetchMyShortUrl();
         }
     }, [selectedUrl]);
 
+    useEffect(() => {
+        if (isCopied) {
+            const timer = setTimeout(() => {
+                setIsCopied(false);
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [isCopied]);
+
+    // Truncate long URLs for better display
+    const truncateUrl = (url, maxLength = 60) => {
+        if (url.length <= maxLength) return url;
+        return url.substring(0, maxLength) + '...';
+    };
+
     return (
-        <div className={`bg-slate-100 shadow-lg border border-dotted  border-slate-500 px-6 sm:py-1 py-3 rounded-md  transition-all duration-100 `}>
-            <div className={`flex sm:flex-row flex-col  sm:justify-between w-full sm:gap-0 gap-5 py-5 `}>
-                <div className="flex-1 sm:space-y-1 max-w-full overflow-x-auto overflow-y-hidden ">
-                    <div className="text-slate-900 pb-1 sm:pb-0   flex items-center gap-2 ">
-                        <a href={`${import.meta.env.VITE_REACT_FRONT_END_URL}/${shortUrl}`}
-                            target="_blank"
-                            className=" text-[17px]  font-montserrat font-[600] text-linkColor ">
-                            {subDomain + "/" + `${shortUrl}`}
-                        </a>
-                        <FaExternalLinkAlt className="text-linkColor" />
-                    </div>
-                    <div className="flex items-center gap-1 ">
-                        <h3 className=" text-slate-700 font-[400] text-[17px] ">
-                            {originalUrl}
-                        </h3>
-                    </div>
-                    <div className="flex   items-center gap-8 pt-6 ">
-                        <div className="flex gap-1  items-center font-semibold  text-green-800">
-                            <span>
-                                <MdOutlineAdsClick className="text-[22px] me-1" />
-                            </span>
-                            <span className="text-[16px]">{clickCount}</span>
-                            <span className="text-[15px] ">
-                                {clickCount === 0 || clickCount === 1 ? "Click" : "Clicks"}
-                            </span>
+        <div className={`bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden group animate-fadeIn`}
+            style={{ animationDelay: `${index * 100}ms` }}>
+
+            {/* Main Content */}
+            <div className="p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+
+                    {/* URL Information */}
+                    <div className="flex-1 space-y-4">
+                        {/* Short URL */}
+                        <div className="flex items-center gap-3 group/link">
+                            <a
+                                href={`${import.meta.env.VITE_REACT_FRONT_END_URL}/${shortUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-lg font-semibold bg-gradient-to-r from-emerald-600 to-teal-700 bg-clip-text text-transparent hover:from-emerald-700 hover:to-teal-800 transition-all duration-300 flex items-center gap-2"
+                            >
+                                <span className="font-mono">{subDomain}/{shortUrl}</span>
+                                <FaExternalLinkAlt className="text-sm text-emerald-600 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
+                            </a>
                         </div>
 
-                        <div className="flex items-center gap-2 font-semibold text-lg text-slate-800">
-                            <span>
-                                <FaRegCalendarAlt />
-                            </span>
-                            <span className="text-[17px]">
-                                {dayjs(createdDate).format("MMM DD, YYYY")}
-                            </span>
+                        {/* Original URL */}
+                        <div className="flex items-start gap-2">
+                            <div className="bg-gray-100 rounded-lg px-3 py-2 flex-1">
+                                <p className="text-gray-700 text-sm break-all" title={originalUrl}>
+                                    {truncateUrl(originalUrl, 80)}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="flex flex-wrap items-center gap-6 pt-2">
+                            <div className="flex items-center gap-2 bg-emerald-50 rounded-lg px-3 py-2">
+                                <MdOutlineAdsClick className="text-emerald-600 text-xl" />
+                                <span className="font-semibold text-emerald-800">{clickCount}</span>
+                                <span className="text-emerald-700 text-sm">
+                                    {clickCount === 0 || clickCount === 1 ? "Click" : "Clicks"}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 bg-teal-50 rounded-lg px-3 py-2">
+                                <FaRegCalendarAlt className="text-teal-600" />
+                                <span className="text-teal-800 font-medium">
+                                    {dayjs(createdDate).format("MMM DD, YYYY")}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="flex  flex-1  sm:justify-end items-center gap-4">
-                    <CopyToClipboard
-                        onCopy={() => setIsCopied(true)}
-                        text={`${import.meta.env.VITE_REACT_FRONT_END_URL + "/" + `${shortUrl}`}`}
-                    >
-                        <div className="flex cursor-pointer gap-1 items-center bg-btnColor py-2  font-semibold shadow-md shadow-slate-500 px-6 rounded-md text-white ">
-                            <button className="">{isCopied ? "Copied" : "Copy"}</button>
-                            {isCopied ? (
-                                <LiaCheckSolid className="text-md" />
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-3 lg:flex-col xl:flex-row">
+                        <CopyToClipboard
+                            onCopy={() => setIsCopied(true)}
+                            text={`${import.meta.env.VITE_REACT_FRONT_END_URL}/${shortUrl}`}
+                        >
+                            <button className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 ${isCopied
+                                    ? 'bg-gradient-to-r from-green-500 to-emerald-600'
+                                    : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700'
+                                }`}>
+                                <span className="text-sm">{isCopied ? "Copied!" : "Copy"}</span>
+                                {isCopied ? (
+                                    <LiaCheckSolid className="text-lg" />
+                                ) : (
+                                    <IoCopy className="text-lg" />
+                                )}
+                            </button>
+                        </CopyToClipboard>
+
+                        <button
+                            onClick={() => analyticsHandler(shortUrl)}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                        >
+                            <span className="text-sm">Analytics</span>
+                            <MdAnalytics className="text-lg" />
+                            {analyticToggle ? (
+                                <FaChevronUp className="text-sm" />
                             ) : (
-                                <IoCopy className="text-md" />
+                                <FaChevronDown className="text-sm" />
                             )}
-                        </div>
-                    </CopyToClipboard>
-
-                    <div
-                        onClick={() => analyticsHandler(shortUrl)}
-                        className="flex cursor-pointer gap-1 items-center bg-rose-700 py-2 font-semibold shadow-md shadow-slate-500 px-6 rounded-md text-white "
-                    >
-                        <button>Analytics</button>
-                        <MdAnalytics className="text-md" />
+                        </button>
                     </div>
                 </div>
             </div>
-            <React.Fragment>
-                <div className={`${analyticToggle ? "flex" : "hidden"
-                    }  max-h-96 sm:mt-0 mt-5 min-h-96 relative  border-t-2 w-[100%] overflow-hidden `}>
-                    {loader ? (
-                        <div className="min-h-[calc(450px-140px)] flex justify-center items-center w-full">
-                            <div className="flex flex-col items-center gap-1">
-                                <Hourglass
-                                    visible={true}
-                                    height="50"
-                                    width="50"
-                                    ariaLabel="hourglass-loading"
-                                    wrapperStyle={{}}
-                                    wrapperClass=""
-                                    colors={['#306cce', '#72a1ed']}
-                                />
-                                <p className='text-slate-700'>Please Wait...</p>
+
+            {/* Analytics Section */}
+            <div className={`transition-all duration-500 ease-in-out ${analyticToggle ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                } overflow-hidden`}>
+                <div className="border-t border-gray-100 bg-gradient-to-r from-gray-50 to-emerald-50/30">
+                    <div className="p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <MdAnalytics className="text-emerald-600 text-xl" />
+                            <h3 className="text-lg font-semibold text-gray-800">Analytics Overview</h3>
+                        </div>
+
+                        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                            <div className="h-80 relative">
+                                {loader ? (
+                                    <div className="flex flex-col justify-center items-center h-full">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <Hourglass
+                                                visible={true}
+                                                height="50"
+                                                width="50"
+                                                ariaLabel="hourglass-loading"
+                                                colors={['#10b981', '#14b8a6']}
+                                            />
+                                            <p className='text-gray-600 font-medium'>Loading analytics...</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {!analyticsData || analyticsData.length === 0 ? (
+                                            <div className="flex flex-col justify-center items-center h-full text-center">
+                                                <div className="relative mb-6">
+                                                    <div className="bg-gradient-to-br from-cyan-100 to-blue-100 rounded-full p-5 w-18 h-18 flex items-center justify-center shadow-lg mx-auto">
+                                                        <MdAnalytics className="text-cyan-600 text-3xl" />
+                                                    </div>
+                                                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-orange-400 to-red-500 rounded-full flex items-center justify-center animate-pulse">
+                                                        <span className="text-white text-xs font-bold">0</span>
+                                                    </div>
+                                                </div>
+                                                <h4 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-3">
+                                                    No Analytics Data
+                                                </h4>
+                                                <p className="text-gray-600 max-w-sm leading-relaxed mb-4">
+                                                    Share your short link to start collecting engagement data and see detailed analytics
+                                                </p>
+                                                <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg p-3 border border-cyan-200 max-w-sm">
+                                                    <div className="flex items-center justify-center gap-2 text-cyan-700">
+                                                        <div className="flex gap-1">
+                                                            <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></div>
+                                                            <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                                            <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                                        </div>
+                                                        <span className="text-xs font-medium">Waiting for first click...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <Graph graphData={analyticsData} />
+                                        )}
+                                    </>
+                                )}
                             </div>
                         </div>
-                    ) : (
-                        <>{!analyticsData || analyticsData.length === 0 ? (
-                            <div className="absolute flex flex-col  justify-center sm:items-center items-end  w-full left-0 top-0 bottom-0 right-0 m-auto">
-                                <h1 className=" text-slate-800 font-serif sm:text-2xl text-[15px] font-bold mb-1">
-                                    No Data For This Time Period
-                                </h1>
-                                <h3 className="sm:w-96 w-[90%] sm:ml-0 pl-6 text-center sm:text-lg text-[12px] text-slate-600 ">
-                                    Share your short link to view where your engagements are
-                                    coming from
-                                </h3>
-                            </div>
-                        ) : (
-                            <Graph graphData={analyticsData} />
-                        )}
-                        </>
-                    )}
+                    </div>
                 </div>
-            </React.Fragment>
+            </div>
         </div>
     )
 }
