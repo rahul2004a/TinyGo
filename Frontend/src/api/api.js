@@ -12,11 +12,11 @@ api.interceptors.response.use(
     if (error.response?.status === 429) {
       const errorData = error.response.data;
       const nextAllowedTime = errorData.nextAllowedTime;
-      
+
       if (nextAllowedTime) {
         const waitTime = new Date(nextAllowedTime) - new Date();
         const waitSeconds = Math.ceil(waitTime / 1000);
-        
+
         showToast.error(
           `Rate limit exceeded! You can create ${errorData.maxRequests} URLs per ${errorData.timeWindowMinutes} minute(s). Please wait ${waitSeconds} seconds.`,
           { duration: 6000 }

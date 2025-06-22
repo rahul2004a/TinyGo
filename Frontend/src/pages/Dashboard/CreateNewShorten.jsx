@@ -118,7 +118,7 @@ const CreateNewShorten = ({ setOpen, refetch }) => {
                 <form onSubmit={handleSubmit(createShortUrlHandler)} className="p-6 space-y-6">
                     {/* Rate Limit Status */}
                     <RateLimitStatus className="mb-4" />
-                    
+
                     {/* Rate Limit Warning */}
                     {isRateLimited && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
@@ -151,7 +151,7 @@ const CreateNewShorten = ({ setOpen, refetch }) => {
                                 placeholder="https://example.com"
                                 className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${errors.originalUrl
                                     ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
-                                    : isRateLimited 
+                                    : isRateLimited
                                         ? 'border-red-300 bg-red-50 cursor-not-allowed'
                                         : 'border-gray-300 focus:ring-emerald-500/20 focus:border-emerald-500'
                                     }`}
@@ -179,13 +179,12 @@ const CreateNewShorten = ({ setOpen, refetch }) => {
                         </button>
                         <button
                             type="submit"
-                            className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl ${
-                                isRateLimited
+                            className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl ${isRateLimited
                                     ? 'bg-gray-400 cursor-not-allowed text-white'
                                     : loading
-                                    ? 'bg-gray-400 cursor-not-allowed text-white'
-                                    : 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-600 hover:via-teal-700 hover:to-cyan-700 text-white'
-                            }`}
+                                        ? 'bg-gray-400 cursor-not-allowed text-white'
+                                        : 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-600 hover:via-teal-700 hover:to-cyan-700 text-white'
+                                }`}
                             disabled={loading || isRateLimited}
                         >
                             {loading ? (

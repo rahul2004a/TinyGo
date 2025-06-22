@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import api from '../api/api';
-import { useStoreContext } from '../contextApi/ContextApi';
+import { useState, useEffect, useCallback } from "react";
+import api from "../api/api";
+import { useStoreContext } from "../contextApi/ContextApi";
 
 export const useRateLimit = () => {
   const { token } = useStoreContext();
@@ -10,22 +10,22 @@ export const useRateLimit = () => {
 
   const fetchRateLimitStatus = useCallback(async () => {
     if (!token) return;
-    
+
     try {
       setLoading(true);
-      const response = await api.get('/api/urls/rate-limit-status', {
+      const response = await api.get("/api/urls/rate-limit-status", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       const status = response.data;
       setRateLimitStatus(status);
       setIsRateLimited(status.remainingRequests === 0);
-      
+
       return status;
     } catch (error) {
-      console.error('Failed to fetch rate limit status:', error);
+      console.error("Failed to fetch rate limit status:", error);
       return null;
     } finally {
       setLoading(false);
@@ -38,17 +38,17 @@ export const useRateLimit = () => {
 
   const getRemainingTime = useCallback(() => {
     if (!rateLimitStatus?.nextAllowedTime) return null;
-    
+
     const nextTime = new Date(rateLimitStatus.nextAllowedTime);
     const now = new Date();
     const diffMs = nextTime - now;
-    
+
     if (diffMs <= 0) return null;
-    
+
     return {
       milliseconds: diffMs,
       seconds: Math.ceil(diffMs / 1000),
-      formatted: `${Math.ceil(diffMs / 1000)} seconds`
+      formatted: `${Math.ceil(diffMs / 1000)} seconds`,
     };
   }, [rateLimitStatus]);
 
@@ -69,7 +69,7 @@ export const useRateLimit = () => {
     fetchRateLimitStatus,
     checkRateLimit,
     getRemainingTime,
-    refresh: fetchRateLimitStatus
+    refresh: fetchRateLimitStatus,
   };
 };
 
