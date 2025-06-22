@@ -25,7 +25,7 @@ const RateLimitStatus = ({ className = "" }) => {
                 },
             });
             setRateLimitStatus(response.data);
-            console.log('Rate limit status fetched:', response.data);
+            // console.log('Rate limit status fetched:', response.data);
         } catch (error) {
             console.error('Failed to fetch rate limit status:', error);
             setError(error.response?.data?.message || 'Failed to load rate limit status');

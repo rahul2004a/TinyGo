@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 
@@ -40,9 +41,13 @@ public class UrlMappingService implements Serializable {
     private ObjectMapper objectMapper;
 
     private static final String URL_CACHE_PREFIX = "shorturl:";
+    private static final int CLICK_DEDUP_WINDOW_SECONDS = 5; // 5 seconds deduplication window
 
     private static final String BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final int BASE = BASE62_ALPHABET.length();
+
+    // Map to track recent clicks for deduplication - in memory for performance
+    private final Map<String, LocalDateTime> recentClicks = new ConcurrentHashMap<>();
 
     @Transactional
     public UrlMappingDTO createShortUrl(String originalUrl, User user) {
@@ -185,13 +190,58 @@ public class UrlMappingService implements Serializable {
         return urlMapping;
     }
 
+    public UrlMapping checkOriginalUrl(String shortUrl) {
+        Object cached = redisTemplate.opsForValue().get(URL_CACHE_PREFIX + shortUrl);
+
+        UrlMapping urlMapping = null;
+        if (cached instanceof UrlMapping) {
+            urlMapping = (UrlMapping) cached;
+        } else if (cached instanceof LinkedHashMap) {
+            urlMapping = objectMapper.convertValue(cached, UrlMapping.class);
+        }
+
+        if (urlMapping != null) {
+            if (urlMapping.getId() == null) {
+                urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+            } else {
+                urlMapping = urlMappingRepository.findById(urlMapping.getId())
+                        .orElse(null);
+            }
+        } else {
+            urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+        }
+
+        return urlMapping;
+    }
+
     @Async
     public CompletableFuture<Void> recordClickAsync(UrlMapping urlMapping) {
+        String clickKey = urlMapping.getShortUrl();
+        LocalDateTime now = LocalDateTime.now();
+        
+        // Check if this is a duplicate click within the deduplication window
+        synchronized (recentClicks) {
+            LocalDateTime lastClick = recentClicks.get(clickKey);
+            if (lastClick != null && now.isBefore(lastClick.plusSeconds(CLICK_DEDUP_WINDOW_SECONDS))) {
+                // This is a duplicate click, ignore it
+                return CompletableFuture.completedFuture(null);
+            }
+            
+            // Record this click
+            recentClicks.put(clickKey, now);
+            
+            // Clean up old entries to prevent memory leak
+            recentClicks.entrySet().removeIf(entry -> 
+                now.isAfter(entry.getValue().plusSeconds(CLICK_DEDUP_WINDOW_SECONDS * 2))
+            );
+        }
+        
+        // Record the click
         urlMapping.setClickCount(urlMapping.getClickCount() + 1);
         urlMappingRepository.save(urlMapping);
 
         ClickEvent clickEvent = new ClickEvent();
-        clickEvent.setClickDate(LocalDateTime.now());
+        clickEvent.setClickDate(now);
         clickEvent.setUrlMapping(urlMapping);
         clickEventRepository.save(clickEvent);
 

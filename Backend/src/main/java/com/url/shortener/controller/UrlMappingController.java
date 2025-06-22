@@ -103,13 +103,13 @@ public class UrlMappingController {
         int remainingRequests = rateLimiterService.getRemainingRequests(username);
         LocalDateTime nextAllowedTime = rateLimiterService.getTimeUntilNextAllowedRequest(username);
 
-        Map<String, Object> status = Map.of(
-                "maxRequests", 15,
-                "timeWindowMinutes", 1,
-                "currentRequests", currentRequests,
-                "remainingRequests", remainingRequests,
-                "canCreateUrl", remainingRequests > 0,
-                "nextAllowedTime", nextAllowedTime != null ? nextAllowedTime.toString() : null);
+        Map<String, Object> status = new java.util.HashMap<>();
+        status.put("maxRequests", 15);
+        status.put("timeWindowMinutes", 1);
+        status.put("currentRequests", currentRequests);
+        status.put("remainingRequests", remainingRequests);
+        status.put("canCreateUrl", remainingRequests > 0);
+        status.put("nextAllowedTime", nextAllowedTime != null ? nextAllowedTime.toString() : null);
 
         return ResponseEntity.ok(status);
     }

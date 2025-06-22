@@ -22,11 +22,26 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate, index }) 
     const [selectedUrl, setSelectedUrl] = useState("");
     const [analyticsData, setAnalyticsData] = useState([]);
     const [analyticToggle, setAnalyticToggle] = useState(false);
+    const [linkClicked, setLinkClicked] = useState(false);
 
     const subDomain = import.meta.env.VITE_REACT_FRONT_END_URL.replace(
         /^https?:\/\//,
         ""
     );
+
+    const handleLinkClick = (e) => {
+        if (linkClicked) {
+            e.preventDefault();
+            return false;
+        }
+        
+        setLinkClicked(true);
+        
+        // Reset the clicked state after 3 seconds to allow future clicks
+        setTimeout(() => {
+            setLinkClicked(false);
+        }, 3000);
+    };
 
     const analyticsHandler = (shortUrl) => {
         if (!analyticToggle) {
@@ -95,7 +110,10 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate, index }) 
                                 href={`${import.meta.env.VITE_REACT_FRONT_END_URL}/${shortUrl}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-lg font-semibold bg-gradient-to-r from-emerald-600 to-teal-700 bg-clip-text text-transparent hover:from-emerald-700 hover:to-teal-800 transition-all duration-300 flex items-center gap-2"
+                                onClick={handleLinkClick}
+                                className={`text-lg font-semibold bg-gradient-to-r from-emerald-600 to-teal-700 bg-clip-text text-transparent hover:from-emerald-700 hover:to-teal-800 transition-all duration-300 flex items-center gap-2 ${
+                                    linkClicked ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
                             >
                                 <span className="font-mono">{subDomain}/{shortUrl}</span>
                                 <FaExternalLinkAlt className="text-sm text-emerald-600 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />

@@ -33,7 +33,7 @@ public class RedirectController {
 
     @RequestMapping(value = "/{shortUrl}", method = RequestMethod.HEAD)
     public ResponseEntity<Void> checkUrl(@PathVariable String shortUrl) {
-        UrlMapping urlMapping = urlMappingService.getOriginalUrl(shortUrl);
+        UrlMapping urlMapping = urlMappingService.checkOriginalUrl(shortUrl);
         if (urlMapping != null) {
             return ResponseEntity.ok().build();
         } else {
