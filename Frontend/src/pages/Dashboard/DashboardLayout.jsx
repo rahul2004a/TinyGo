@@ -6,6 +6,7 @@ import Graph from './Graph'
 import ShortenPopUp from './ShortenPopUp'
 import Loader from '../../components/Loader'
 import ShortenUrlList from './ShortenUrlList'
+import RateLimitStatus from '../../components/RateLimitStatus'
 import { useStoreContext } from '../../contextApi/ContextApi'
 import { useFetchMyShortUrls, useFetchTotalClicks } from '../../hooks/useQuery'
 
@@ -42,7 +43,7 @@ const DashboardLayout = () => {
                     </div>
 
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
                         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -79,6 +80,11 @@ const DashboardLayout = () => {
                                     <FaUsers className="text-cyan-600 text-xl" />
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Rate Limit Status Card */}
+                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+                            <RateLimitStatus className="!bg-transparent !border-0 !shadow-none" />
                         </div>
                     </div>
 

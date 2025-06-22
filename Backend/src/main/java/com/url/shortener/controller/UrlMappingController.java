@@ -2,7 +2,9 @@ package com.url.shortener.controller;
 
 import com.url.shortener.dtos.ClickEventDTO;
 import com.url.shortener.dtos.UrlMappingDTO;
+import com.url.shortener.exception.RateLimitExceededException;
 import com.url.shortener.models.User;
+import com.url.shortener.service.RateLimiterService;
 import com.url.shortener.service.UrlMappingService;
 import com.url.shortener.service.UserService;
 import lombok.AllArgsConstructor;
@@ -29,11 +31,28 @@ public class UrlMappingController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RateLimiterService rateLimiterService;
+
     @PostMapping("/shorten")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UrlMappingDTO> createShortUrl(@RequestBody Map<String, String> request, Principal principal) {
         String originalUrl = request.get("originalUrl");
-        User user = userService.findByUsername(principal.getName());
+        String username = principal.getName();
+
+        if (!rateLimiterService.isRequestAllowed(username)) {
+            LocalDateTime nextAllowedTime = rateLimiterService.getTimeUntilNextAllowedRequest(username);
+            int remainingRequests = rateLimiterService.getRemainingRequests(username);
+
+            throw new RateLimitExceededException(
+                    "Too many URLs created. You can create maximum 15 URLs per minute. Please wait before creating more URLs.",
+                    15,
+                    1,
+                    nextAllowedTime,
+                    remainingRequests);
+        }
+
+        User user = userService.findByUsername(username);
         UrlMappingDTO urlMappingDTO = urlMappingService.createShortUrl(originalUrl, user);
         return ResponseEntity.ok(urlMappingDTO);
     }
@@ -73,6 +92,36 @@ public class UrlMappingController {
     public ResponseEntity<Map<String, Boolean>> checkUrlExists(@PathVariable String shortUrl) {
         boolean exists = urlMappingService.getOriginalUrl(shortUrl) != null;
         return ResponseEntity.ok(Map.of("exists", exists));
+    }
+
+    @GetMapping("/rate-limit-status")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Map<String, Object>> getRateLimitStatus(Principal principal) {
+        String username = principal.getName();
+
+        int currentRequests = rateLimiterService.getCurrentRequestCount(username);
+        int remainingRequests = rateLimiterService.getRemainingRequests(username);
+        LocalDateTime nextAllowedTime = rateLimiterService.getTimeUntilNextAllowedRequest(username);
+
+        Map<String, Object> status = Map.of(
+                "maxRequests", 15,
+                "timeWindowMinutes", 1,
+                "currentRequests", currentRequests,
+                "remainingRequests", remainingRequests,
+                "canCreateUrl", remainingRequests > 0,
+                "nextAllowedTime", nextAllowedTime != null ? nextAllowedTime.toString() : null);
+
+        return ResponseEntity.ok(status);
+    }
+
+    @PostMapping("/admin/reset-rate-limit/{username}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, String>> resetUserRateLimit(@PathVariable String username) {
+        rateLimiterService.resetUserRateLimit(username);
+        return ResponseEntity.ok(Map.of(
+                "message", "Rate limit reset successfully for user: " + username,
+                "username", username,
+                "resetTime", LocalDateTime.now().toString()));
     }
 
 }

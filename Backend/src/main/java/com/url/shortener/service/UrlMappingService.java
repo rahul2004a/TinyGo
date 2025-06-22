@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
+
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -144,6 +147,7 @@ public class UrlMappingService implements Serializable {
                 .collect(Collectors.groupingBy(click -> click.getClickDate().toLocalDate(), Collectors.counting()));
     }
 
+    @Transactional
     public UrlMapping getOriginalUrl(String shortUrl) {
         Object cached = redisTemplate.opsForValue().get(URL_CACHE_PREFIX + shortUrl);
 
@@ -168,29 +172,29 @@ public class UrlMappingService implements Serializable {
                 }
             }
 
-            urlMapping.setClickCount(urlMapping.getClickCount() + 1);
-            urlMappingRepository.save(urlMapping);
-
-            ClickEvent clickEvent = new ClickEvent();
-            clickEvent.setClickDate(LocalDateTime.now());
-            clickEvent.setUrlMapping(urlMapping);
-            clickEventRepository.save(clickEvent);
+            recordClickAsync(urlMapping);
 
             return urlMapping;
         }
 
         urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
         if (urlMapping != null) {
-            urlMapping.setClickCount(urlMapping.getClickCount() + 1);
-            urlMappingRepository.save(urlMapping);
-
-            ClickEvent clickEvent = new ClickEvent();
-            clickEvent.setClickDate(LocalDateTime.now());
-            clickEvent.setUrlMapping(urlMapping);
-            clickEventRepository.save(clickEvent);
-
+            recordClickAsync(urlMapping);
             redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, urlMapping, 1, TimeUnit.DAYS);
         }
         return urlMapping;
+    }
+
+    @Async
+    public CompletableFuture<Void> recordClickAsync(UrlMapping urlMapping) {
+        urlMapping.setClickCount(urlMapping.getClickCount() + 1);
+        urlMappingRepository.save(urlMapping);
+
+        ClickEvent clickEvent = new ClickEvent();
+        clickEvent.setClickDate(LocalDateTime.now());
+        clickEvent.setUrlMapping(urlMapping);
+        clickEventRepository.save(clickEvent);
+
+        return CompletableFuture.completedFuture(null);
     }
 }
