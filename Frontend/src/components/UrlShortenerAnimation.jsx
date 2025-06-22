@@ -12,9 +12,9 @@ const UrlShortenerAnimation = React.memo(() => {
     ], []);
 
     const shortUrls = useMemo(() => [
-        "tinygo.ly/abc123",
-        "tinygo.ly/def456",
-        "tinygo.ly/ghi789"
+        "tiny-go.netlify.app/abc123",
+        "tiny-go.netlify.app/def456",
+        "tiny-go.netlify.app/ghi789"
     ], []);
 
     useEffect(() => {

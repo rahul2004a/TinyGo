@@ -1,18 +1,168 @@
 # TinyGo - URL Shortener Application
 
-TinyGo is a modern URL shortener application designed to simplify sharing long URLs. It features a robust backend built with Spring Boot and a sleek frontend powered by a modern JavaScript framework. TinyGo provides a seamless experience for shortening URLs, tracking click events, and managing user accounts.
+TinyGo is a modern URL shortener application designed to simplify sharing long URLs. It features a robust backend built with Spring Boot 3 and a sleek, responsive frontend powered by React and Vite. TinyGo provides a seamless experience for shortening URLs, tracking click events, generating QR codes, and managing user accounts with real-time analytics.
+
+![TinyGo Banner](Frontend/public/images/img2.png)
 
 ## Features
 
-- **URL Shortening**: Generate short and shareable URLs.
-- **Click Tracking**: Monitor click events and analytics for shortened URLs.
-- **User Authentication**: Secure user registration and login.
-- **Responsive Design**: Modern and responsive UI built with Tailwind CSS.
-- **Scalable Backend**: Built with Spring Boot and MySQL for scalability.
+### Core Features
+
+- **URL Shortening**: Generate short, memorable URLs with advanced CRC32-based algorithm
+- **QR Code Generation**: Create downloadable QR codes for shortened URLs for easy mobile sharing
+- **User Authentication**: Secure user registration and login with JWT-based authentication
+- **Advanced Analytics Dashboard**: Visualize click data with interactive charts and comprehensive statistics
+- **Click Tracking**: Monitor click events and analytics for each shortened URL with time-based analysis
+- **Smart Rate Limiting**: Configurable rate limiting system to prevent abuse (15 URLs per minute)
+- **Real-time Copy to Clipboard**: One-click copy functionality with visual feedback
+- **Beautiful Animations**: Smooth, responsive UI animations using Framer Motion
+- **Mobile-Optimized Design**: Fully responsive UI built with Tailwind CSS
+
+### Technical Features
+
+- **Spring Boot 3 Backend**: Secure and scalable Java-based RESTful API with latest features
+- **React 18 Frontend**: Modern UI built with React, Vite, and Tailwind CSS
+- **JWT Authentication**: Stateless, secure token-based authentication system
+- **Redis Caching**: Performance optimization with Redis for high-throughput URL resolution
+- **MySQL Database**: Scalable persistence for storing URL mappings and detailed analytics
+- **Docker Support**: Multi-stage build containerization for optimized deployment
+- **Chart.js Integration**: Beautiful, interactive data visualization components
+- **Comprehensive Error Handling**: Detailed error feedback throughout the application
+- **CORS Security**: Properly configured cross-origin resource sharing policies
+
+## UI Components
+
+### Landing Page
+
+The landing page features a modern, animated design with floating elements and smooth transitions. It showcases the core features of TinyGo with eye-catching gradients and a prominent call-to-action button.
+
+Key Elements:
+
+- Animated background using Framer Motion
+- Feature cards with custom gradients
+- URL shortener animation demonstration
+- Responsive navigation with mobile menu
+
+### Authentication System
+
+The authentication system provides a secure and user-friendly login/registration experience with:
+
+- Form validation using React Hook Form
+- Password strength indicators
+- JWT token-based authentication
+- Persistent user sessions
+- Error feedback with toast notifications
+
+### Dynamic Dashboard
+
+The comprehensive dashboard provides users with a complete overview of their shortened URLs and analytics:
+
+- Summary statistics cards (total links, clicks, etc.)
+- Interactive click analytics graph using Chart.js
+- Sortable and filterable URL listing table
+- Detailed click metrics for each URL
+- Quick-action buttons for copy, QR code, and delete operations
+
+### URL Shortening Interface
+
+The URL creation interface features:
+
+- Real-time URL validation
+- Dynamic rate limit status indicator
+- Animated success feedback
+- Mobile-optimized input fields
+- Keyboard shortcut support
+
+### QR Code Generator
+
+The QR code generation system provides:
+
+- High-quality, customizable QR codes
+- Modal overlay display with backdrop blur
+- Download options in multiple formats
+- Dynamic URL preview
+- Keyboard accessibility
+
+### Real-time Analytics
+
+The analytics features include:
+
+- Daily click trends visualization
+- Automatic data refresh
+- Date range filtering
+- Responsive chart layout
+- CSV export capability
+
+### Rate Limit Monitoring
+
+The rate limiting system includes:
+
+- Visual countdown timer for rate limit reset
+- Dynamic progress indicator
+- Remaining requests counter
+- Automatic status refresh
+- User-friendly explanations
+
+## Technology Stack
+
+### Backend
+
+- **Framework**: Spring Boot 3.x with Spring Security
+- **Language**: Java 17+
+- **Database**: MySQL 8+ for persistent storage
+- **Caching**: Redis for high-performance URL resolution
+- **Security**: JWT authentication, BCrypt password encoding
+- **Build Tool**: Maven
+- **API Documentation**: Swagger/OpenAPI with interactive UI
+- **Containerization**: Docker multi-stage build
+
+### Frontend
+
+- **Framework**: React 18 with function components and hooks
+- **Build Tool**: Vite with optimized production builds
+- **CSS Framework**: Tailwind CSS with custom utility extensions
+- **State Management**: Context API with custom hooks
+- **HTTP Client**: Axios with request/response interceptors
+- **Routing**: React Router v6 with protected routes
+- **Forms**: React Hook Form for validation and submission
+- **Charts**: Chart.js with custom styling
+- **Animations**: Framer Motion for UI transitions
+- **Icons**: React Icons library
+- **Notifications**: Custom toast notification system
+
+## Architecture
+
+TinyGo follows a modern microservices-inspired architecture:
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  React UI   │────▶│  Spring Boot│────▶│   MySQL     │
+│  (Frontend) │◀────│   (API)     │◀────│  Database   │
+└─────────────┘     └─────────────┘     └─────────────┘
+                          │
+                          │
+                    ┌─────▼─────┐
+                    │   Redis   │
+                    │   Cache   │
+                    └───────────┘
+```
+
+- **Frontend**: Single-page application built with React
+- **Backend API**: RESTful services built with Spring Boot
+- **Database**: MySQL for persistent storage
+- **Cache**: Redis for high-performance caching
+
+### Key Design Patterns
+
+- **MVC Pattern**: Clear separation of models, views, and controllers
+- **Repository Pattern**: Data access abstraction
+- **Service Layer**: Business logic encapsulation
+- **DTO Pattern**: Data transfer between layers
+- **Factory Pattern**: Object creation abstraction
 
 ## Folder Structure
 
-The project is organized as follows:
+The project follows a clean, modular structure:
 
 ```
 TinyGo/
@@ -20,60 +170,152 @@ TinyGo/
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/com/url/shortener/
-│   │   │   │   ├── controller/
-│   │   │   │   ├── dtos/
-│   │   │   │   ├── models/
-│   │   │   │   ├── repository/
-│   │   │   │   ├── security/
-│   │   │   │   ├── service/
+│   │   │   │   ├── controller/           # API endpoints
+│   │   │   │   │   ├── AuthController.java        # Authentication endpoints
+│   │   │   │   │   ├── UrlMappingController.java  # URL management
+│   │   │   │   │   └── RedirectController.java    # URL redirection
+│   │   │   │   ├── dtos/                 # Data transfer objects
+│   │   │   │   ├── exception/            # Custom exception handlers
+│   │   │   │   ├── models/               # JPA entity classes
+│   │   │   │   │   ├── User.java                  # User entity
+│   │   │   │   │   ├── UrlMapping.java            # URL mapping entity
+│   │   │   │   │   └── ClickEvent.java            # Click tracking entity
+│   │   │   │   ├── repository/           # Data access layer
+│   │   │   │   ├── security/             # Authentication config
+│   │   │   │   │   ├── jwt/                      # JWT implementation
+│   │   │   │   │   ├── WebSecurityConfig.java    # Security configuration
+│   │   │   │   │   └── CorsConfig.java           # CORS configuration
+│   │   │   │   ├── service/              # Business logic
+│   │   │   │   │   ├── UrlMappingService.java    # URL shortening logic
+│   │   │   │   │   ├── RateLimiterService.java   # Rate limiting implementation
+│   │   │   │   │   ├── UserService.java          # User management
+│   │   │   │   │   └── QRCodeService.java        # QR code generation
 │   │   │   │   └── UrlShortenerSbApplication.java
 │   │   │   ├── resources/
-│   │   │   │   ├── application.properties
-│   │   │   │   └── static/
-│   │   │   └── webapp/
-│   ├── target/
-│   ├── Dockerfile
-│   └── pom.xml
-|
-|
+│   │   │   │   ├── application.properties # Configuration properties
+│   ├── Dockerfile                   # Multi-stage Docker build
+│   └── pom.xml                      # Maven dependencies
 ├── Frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── assets/
-│   │   └── main.js
-│   ├── public/
-│   ├── package.json
-│   └── vite.config.js
-└── README.md
+│   │   ├── api/                     # API client configuration
+│   │   ├── components/              # Reusable UI components
+│   │   │   ├── Navbar.jsx                # Navigation component
+│   │   │   ├── QRCodeGenerator.jsx       # QR code generation
+│   │   │   ├── RateLimitStatus.jsx       # Rate limit indicators
+│   │   │   └── UrlShortenerAnimation.jsx # Visual animations
+│   │   ├── contextApi/              # Context for state management
+│   │   ├── hooks/                   # Custom React hooks
+│   │   │   ├── useQuery.js               # Data fetching hooks
+│   │   │   └── useRateLimit.js           # Rate limit hooks
+│   │   ├── pages/                   # Page components
+│   │   │   ├── Dashboard/                # Dashboard components
+│   │   │   │   ├── DashboardLayout.jsx   # Main dashboard layout
+│   │   │   │   ├── Graph.jsx             # Analytics visualization
+│   │   │   │   └── ShortenUrlList.jsx    # URL management
+│   │   │   ├── LandingPage.jsx           # Homepage
+│   │   │   └── Loginpage.jsx             # Authentication
+│   │   ├── utils/                   # Utility functions
+│   │   │   ├── helper.js                 # Helper utilities
+│   │   │   └── toast.js                  # Notification system
+│   │   └── App.jsx                  # Main application component
+│   ├── public/                      # Static assets
+│   ├── package.json                 # NPM dependencies
+│   └── vite.config.js               # Vite build configuration
+└── README.md                        # Project documentation
 ```
 
-- **Backend**: Contains the Spring Boot application code, including controllers, services, models, and repositories.
-  - **Dockerfile**: Used to build the Docker image for the backend application.
-- **Frontend**: Contains the JavaScript framework-based UI code, including components, pages, and assets.
-- **README.md**: Documentation for the project.
+## Key API Endpoints
+
+### Authentication
+
+- `POST /api/auth/public/register` - Register a new user with validation
+- `POST /api/auth/public/login` - Authenticate and generate JWT token
+
+### URL Management
+
+- `POST /api/urls/shorten` - Create a shortened URL (rate-limited)
+- `GET /api/urls/myurls` - Get all URLs for the current user
+- `GET /api/urls/analytics/{shortUrl}` - Get detailed analytics for a URL
+- `GET /api/urls/total-clicks` - Get aggregated click statistics
+- `GET /api/urls/check/{shortUrl}` - Check if a short URL exists
+- `GET /api/urls/qrcode/{shortUrl}` - Generate QR code for a URL
+- `GET /api/urls/rate-limit-status` - Get current rate limit status
+- `DELETE /api/urls/{shortUrl}` - Delete a shortened URL
+
+### URL Redirection
+
+- `GET /{shortUrl}` - Redirect to the original URL with click tracking
+- `HEAD /{shortUrl}` - Check URL validity without incrementing counter
+
+## Performance Features
+
+### Redis Caching
+
+TinyGo implements Redis caching for high-performance URL resolution:
+
+- Cached URL mappings for fast lookups
+- Optimized for high-traffic scenarios
+- Graceful fallback to database on cache miss
+- Configurable cache expiry
+
+### Rate Limiting
+
+Sophisticated rate limiting to prevent abuse:
+
+- Configurable request limits (15 URLs per minute by default)
+- Per-user tracking with in-memory storage
+- Countdown timer for rate limit reset
+- Detailed rate limit status information
+
+### Click Tracking Optimization
+
+Efficient click tracking with deduplication:
+
+- Time-based deduplication to prevent click spam
+- Batch processing for high-volume scenarios
+- Asynchronous event recording for performance
+- Detailed analytics without performance penalty
 
 ## Installation Instructions
+
+### Prerequisites
+
+- Java 17 or higher
+- Node.js 16 or higher
+- MySQL 8.0 or higher
+- Redis (optional, for caching)
+- Docker (optional, for containerized deployment)
 
 ### Backend Setup
 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/rahul2004a/TinyGo.git
+   git clone https://github.com/yourusername/TinyGo.git
    cd TinyGo/Backend
    ```
 
 2. Configure the database:
 
-   - Set up a MySQL database.
-   - Update the `application.properties` file with your database credentials.
+   - Create a MySQL database for TinyGo
+   - Create a `.env` file in the Backend directory with the following variables:
+     ```
+     DATABASE_URL=jdbc:mysql://localhost:3306/tinygo
+     DATABASE_USERNAME=your_username
+     DATABASE_PASSWORD=your_password
+     DATABASE_DIALECT=org.hibernate.dialect.MySQLDialect
+     JWT_SECRET=your_jwt_secret_key
+     FRONTED_URL=http://localhost:5173
+     ```
 
 3. Build and run the backend:
+
    ```bash
-   mvn clean install
-   mvn spring-boot:run
+   ./mvnw clean install
+   ./mvnw spring-boot:run
    ```
+
+   The backend will be available at `http://localhost:8080`
 
 ### Frontend Setup
 
@@ -89,147 +331,99 @@ TinyGo/
    npm install
    ```
 
-3. Start the development server:
+3. Configure environment variables:
+
+   - Create a `.env` file with:
+     ```
+     VITE_BACKEND_URL=http://localhost:8080
+     VITE_REACT_FRONT_END_URL=http://localhost:5173
+     ```
+
+4. Start the development server:
+
    ```bash
    npm run dev
    ```
 
+   The frontend will be available at `http://localhost:5173`
+
 ## Docker Setup
 
-You can also use the Docker image of the Spring Boot application hosted on Docker Hub for easier deployment.
+TinyGo can be containerized for easy deployment:
 
-### Pull the Docker Image
-
-1. Pull the Docker image from Docker Hub:
-   ```bash
-   docker pull rahul1320/tinygo
-   ```
-
-### Run the Docker Container
-
-2. Run the container:
-
-   ```bash
-   docker run -d -p 8080:8080 --name tinygo-backend rahul1320/tinygo
-   ```
-
-   - The backend will be accessible at `http://localhost:8080`.
-
-### Environment Configuration
-
-3. If you need to configure environment variables (e.g., database credentials), use the `-e` flag:
-   ```bash
-   docker run -d -p 8080:8080 --name tinygo-backend \
-   -e SPRING_DATASOURCE_URL=jdbc:mysql://<db_host>:<db_port>/<db_name> \
-   -e SPRING_DATASOURCE_USERNAME=<db_username> \
-   -e SPRING_DATASOURCE_PASSWORD=<db_password> \
-   rahul1320/tinygo
-   ```
-
----
-
-For more details on Docker usage, refer to the [Docker documentation](https://docs.docker.com/).
-
-## Usage
-
-1. Access the application via the frontend development server URL (e.g., `http://localhost:5173`).
-2. Register or log in to your account.
-3. Paste a long URL and generate a shortened version.
-4. Share the shortened URL and track its click analytics.
-
-## Technologies Used
-
-### Backend
-
-- **Spring Boot**: Framework for building the backend.
-- **Maven**: Dependency management.
-- **MySQL**: Relational database.
-- **Redis**: In-memory data structure store for caching (optional).
-- **Lombok**: Simplifies Java code with annotations.
-- **Spring Boot Starter Data JPA**: ORM for database interactions.
-- **Spring Boot Starter Web**: RESTful web services.
-- **Spring Boot Starter Test**: Testing utilities.
-
-### Frontend
-
-- **Modern JavaScript Framework**: For building the UI.
-- **Tailwind CSS**: Utility-first CSS framework.
-- **Vite**: Fast frontend tooling.
-
-## Redis Configuration
-
-TinyGo uses Redis for caching URL mappings to improve performance. The application is designed to gracefully handle Redis service failures and automatically fallback to database operations.
-
-### Redis Setup
-
-1. **Install Redis** (if not already installed):
-
-   ```bash
-   # macOS
-   brew install redis
-
-   # Ubuntu/Debian
-   sudo apt-get install redis-server
-
-   # Start Redis service
-   redis-server
-   ```
-
-2. **Configuration**: Redis settings are configured in `application.properties`:
-   ```properties
-   spring.data.redis.host=localhost
-   spring.data.redis.port=6379
-   ```
-
-### Redis Error Handling
-
-The application implements robust error handling for Redis service failures:
-
-- **Graceful Degradation**: When Redis is unavailable, the application automatically falls back to database operations
-- **No Service Interruption**: URL shortening and resolution continue to work even when Redis is down
-- **Automatic Recovery**: When Redis comes back online, caching resumes automatically
-- **Detailed Logging**: All Redis connection issues are logged with appropriate error messages
-
-### Common Redis Scenarios
-
-1. **Redis Service Stopped**:
-
-   - URLs are retrieved directly from the database
-   - New URLs are saved to database without caching
-   - Application continues to function normally
-
-2. **Redis Connection Issues**:
-
-   - Automatic fallback to database operations
-   - Warning messages logged for monitoring
-   - No impact on user experience
-
-3. **Redis Memory Issues**:
-   - Cache operations fail gracefully
-   - Database operations continue unaffected
-   - System remains operational
-
-To test Redis error handling, you can stop the Redis service:
+### Backend Container
 
 ```bash
-# Stop Redis service
-sudo systemctl stop redis-server  # Linux
-brew services stop redis          # macOS
-
-# Your application will continue to work, fetching data from the database
+# From the Backend directory
+docker build -t tinygo-backend .
+docker run -p 8080:8080 \
+  -e DATABASE_URL=jdbc:mysql://your-db-host:3306/tinygo \
+  -e DATABASE_USERNAME=your_username \
+  -e DATABASE_PASSWORD=your_password \
+  -e DATABASE_DIALECT=org.hibernate.dialect.MySQLDialect \
+  -e JWT_SECRET=your_jwt_secret_key \
+  -e FRONTED_URL=http://localhost \
+  tinygo-backend
 ```
 
-## Contribution Guidelines
+### Frontend Container
 
-We welcome contributions to TinyGo! To contribute:
+```bash
+# From the Frontend directory
+docker build -t tinygo-frontend .
+docker run -p 80:80 \
+  -e VITE_BACKEND_URL=http://your-backend-url \
+  -e VITE_REACT_FRONT_END_URL=http://your-frontend-url \
+  tinygo-frontend
+```
 
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Commit your changes with clear messages.
-4. Submit a pull request.
+## Development
 
-Please ensure your code adheres to the project's coding standards and includes relevant tests.
+### Backend Development
 
----
+- Hot reload: The Spring Boot application has dev tools enabled for hot reloading
+- Testing: Run tests with `./mvnw test`
 
-Thank you for using TinyGo! If you encounter any issues or have suggestions, feel free to open an issue or contact us.
+### Frontend Development
+
+- Hot module replacement: Vite provides fast hot reloading
+- Build for production: `npm run build`
+- Linting: `npm run lint`
+- Analyze bundle: `npm run analyze`
+
+## Security Considerations
+
+TinyGo implements several security measures:
+
+- JWT token-based authentication with secure token storage
+- Password hashing using BCrypt with salt
+- HTTPS support for secure communication
+- CORS configuration to prevent cross-site request forgery
+- Rate limiting to prevent abuse
+- Input validation for all API endpoints
+
+## Future Enhancements
+
+Planned features for future releases:
+
+- Custom domain support for shortened URLs
+- Advanced user roles and permissions
+- Social media integration
+- URL expiration dates
+- Bulk URL creation
+- Browser extensions
+- Dark mode UI
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
