@@ -218,7 +218,7 @@ public class UrlMappingService implements Serializable {
     public CompletableFuture<Void> recordClickAsync(UrlMapping urlMapping) {
         String clickKey = urlMapping.getShortUrl();
         LocalDateTime now = LocalDateTime.now();
-        
+
         // Check if this is a duplicate click within the deduplication window
         synchronized (recentClicks) {
             LocalDateTime lastClick = recentClicks.get(clickKey);
@@ -226,16 +226,15 @@ public class UrlMappingService implements Serializable {
                 // This is a duplicate click, ignore it
                 return CompletableFuture.completedFuture(null);
             }
-            
+
             // Record this click
             recentClicks.put(clickKey, now);
-            
+
             // Clean up old entries to prevent memory leak
-            recentClicks.entrySet().removeIf(entry -> 
-                now.isAfter(entry.getValue().plusSeconds(CLICK_DEDUP_WINDOW_SECONDS * 2))
-            );
+            recentClicks.entrySet()
+                    .removeIf(entry -> now.isAfter(entry.getValue().plusSeconds(CLICK_DEDUP_WINDOW_SECONDS * 2)));
         }
-        
+
         // Record the click
         urlMapping.setClickCount(urlMapping.getClickCount() + 1);
         urlMappingRepository.save(urlMapping);

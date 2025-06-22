@@ -34,9 +34,9 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate, index }) 
             e.preventDefault();
             return false;
         }
-        
+
         setLinkClicked(true);
-        
+
         // Reset the clicked state after 3 seconds to allow future clicks
         setTimeout(() => {
             setLinkClicked(false);
@@ -111,9 +111,8 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate, index }) 
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={handleLinkClick}
-                                className={`text-lg font-semibold bg-gradient-to-r from-emerald-600 to-teal-700 bg-clip-text text-transparent hover:from-emerald-700 hover:to-teal-800 transition-all duration-300 flex items-center gap-2 ${
-                                    linkClicked ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                                className={`text-lg font-semibold bg-gradient-to-r from-emerald-600 to-teal-700 bg-clip-text text-transparent hover:from-emerald-700 hover:to-teal-800 transition-all duration-300 flex items-center gap-2 ${linkClicked ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                             >
                                 <span className="font-mono">{subDomain}/{shortUrl}</span>
                                 <FaExternalLinkAlt className="text-sm text-emerald-600 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
@@ -155,8 +154,8 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate, index }) 
                             text={`${import.meta.env.VITE_REACT_FRONT_END_URL}/${shortUrl}`}
                         >
                             <button className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 ${isCopied
-                                    ? 'bg-gradient-to-r from-green-500 to-emerald-600'
-                                    : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700'
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-600'
+                                : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700'
                                 }`}>
                                 <span className="text-sm">{isCopied ? "Copied!" : "Copy"}</span>
                                 {isCopied ? (
