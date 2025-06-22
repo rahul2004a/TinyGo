@@ -1,5 +1,6 @@
 package com.url.shortener.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,5 +16,6 @@ public class ClickEvent {
 
     @ManyToOne
     @JoinColumn(name = "url_mapping_id")
+    @JsonBackReference
     private UrlMapping urlMapping;
 }

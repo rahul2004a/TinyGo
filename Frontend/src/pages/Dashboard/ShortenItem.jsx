@@ -7,10 +7,11 @@ import { LiaCheckSolid } from 'react-icons/lia';
 import { Hourglass } from 'react-loader-spinner';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { MdAnalytics, MdOutlineAdsClick } from 'react-icons/md';
-import { FaExternalLinkAlt, FaRegCalendarAlt, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaExternalLinkAlt, FaRegCalendarAlt, FaChevronDown, FaChevronUp, FaQrcode } from 'react-icons/fa';
 
 import Graph from './Graph';
 import api from '../../api/api';
+import QRCodeGenerator from '../../components/QRCodeGenerator';
 import { useStoreContext } from '../../contextApi/ContextApi';
 
 const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate, index }) => {
@@ -23,6 +24,7 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate, index }) 
     const [analyticsData, setAnalyticsData] = useState([]);
     const [analyticToggle, setAnalyticToggle] = useState(false);
     const [linkClicked, setLinkClicked] = useState(false);
+    const [qrCodeOpen, setQrCodeOpen] = useState(false);
 
     const subDomain = import.meta.env.VITE_REACT_FRONT_END_URL.replace(
         /^https?:\/\//,
@@ -178,6 +180,14 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate, index }) 
                                 <FaChevronDown className="text-sm" />
                             )}
                         </button>
+
+                        <button
+                            onClick={() => setQrCodeOpen(true)}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                        >
+                            <FaQrcode className="text-lg" />
+                            <span className="text-sm">QR Code</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -246,6 +256,13 @@ const ShortenItem = ({ originalUrl, shortUrl, clickCount, createdDate, index }) 
                     </div>
                 </div>
             </div>
+
+            {/* QR Code Modal */}
+            <QRCodeGenerator
+                shortUrl={shortUrl}
+                isOpen={qrCodeOpen}
+                onClose={() => setQrCodeOpen(false)}
+            />
         </div>
     )
 }

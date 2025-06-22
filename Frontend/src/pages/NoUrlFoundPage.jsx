@@ -1,7 +1,30 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const NoUrlFoundPage = () => {
+const NoUrlFoundPage = ({ errorType = 'not_found' }) => {
+    const getErrorContent = () => {
+        switch (errorType) {
+            case 'service_error':
+                return {
+                    title: 'Service Temporarily Unavailable',
+                    message: 'Our URL shortening service is experiencing issues.',
+                    description: 'Please try again in a moment. If the problem persists, the service may be under maintenance.',
+                    iconColor: 'from-orange-100 to-orange-200',
+                    iconTextColor: 'text-orange-500'
+                };
+            default:
+                return {
+                    title: 'URL Not Found',
+                    message: "Sorry, the short URL you're looking for doesn't exist.",
+                    description: 'The link may have been removed or you may have mistyped the URL.',
+                    iconColor: 'from-red-100 to-red-200',
+                    iconTextColor: 'text-red-500'
+                };
+        }
+    };
+
+    const errorContent = getErrorContent();
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-teal-50 relative overflow-hidden flex items-center justify-center px-4">
             {/* Animated Background Elements */}
@@ -13,9 +36,9 @@ const NoUrlFoundPage = () => {
             <div className="relative z-10 text-center max-w-md mx-auto">
                 {/* Icon */}
                 <div className="mb-8">
-                    <div className="mx-auto w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center shadow-lg">
+                    <div className={`mx-auto w-24 h-24 bg-gradient-to-br ${errorContent.iconColor} rounded-full flex items-center justify-center shadow-lg`}>
                         <svg
-                            className="w-12 h-12 text-red-500"
+                            className={`w-12 h-12 ${errorContent.iconTextColor}`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -32,15 +55,15 @@ const NoUrlFoundPage = () => {
 
                 {/* Content */}
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-emerald-900 to-teal-900 bg-clip-text text-transparent mb-4">
-                    URL Not Found
+                    {errorContent.title}
                 </h1>
 
                 <p className="text-lg text-slate-600 mb-2">
-                    Sorry, the short URL you're looking for doesn't exist.
+                    {errorContent.message}
                 </p>
 
                 <p className="text-sm text-slate-500 mb-8">
-                    The link may have been removed or you may have mistyped the URL.
+                    {errorContent.description}
                 </p>
 
                 {/* Actions */}

@@ -144,6 +144,7 @@ For more details on Docker usage, refer to the [Docker documentation](https://do
 - **Spring Boot**: Framework for building the backend.
 - **Maven**: Dependency management.
 - **MySQL**: Relational database.
+- **Redis**: In-memory data structure store for caching (optional).
 - **Lombok**: Simplifies Java code with annotations.
 - **Spring Boot Starter Data JPA**: ORM for database interactions.
 - **Spring Boot Starter Web**: RESTful web services.
@@ -154,6 +155,69 @@ For more details on Docker usage, refer to the [Docker documentation](https://do
 - **Modern JavaScript Framework**: For building the UI.
 - **Tailwind CSS**: Utility-first CSS framework.
 - **Vite**: Fast frontend tooling.
+
+## Redis Configuration
+
+TinyGo uses Redis for caching URL mappings to improve performance. The application is designed to gracefully handle Redis service failures and automatically fallback to database operations.
+
+### Redis Setup
+
+1. **Install Redis** (if not already installed):
+
+   ```bash
+   # macOS
+   brew install redis
+
+   # Ubuntu/Debian
+   sudo apt-get install redis-server
+
+   # Start Redis service
+   redis-server
+   ```
+
+2. **Configuration**: Redis settings are configured in `application.properties`:
+   ```properties
+   spring.data.redis.host=localhost
+   spring.data.redis.port=6379
+   ```
+
+### Redis Error Handling
+
+The application implements robust error handling for Redis service failures:
+
+- **Graceful Degradation**: When Redis is unavailable, the application automatically falls back to database operations
+- **No Service Interruption**: URL shortening and resolution continue to work even when Redis is down
+- **Automatic Recovery**: When Redis comes back online, caching resumes automatically
+- **Detailed Logging**: All Redis connection issues are logged with appropriate error messages
+
+### Common Redis Scenarios
+
+1. **Redis Service Stopped**:
+
+   - URLs are retrieved directly from the database
+   - New URLs are saved to database without caching
+   - Application continues to function normally
+
+2. **Redis Connection Issues**:
+
+   - Automatic fallback to database operations
+   - Warning messages logged for monitoring
+   - No impact on user experience
+
+3. **Redis Memory Issues**:
+   - Cache operations fail gracefully
+   - Database operations continue unaffected
+   - System remains operational
+
+To test Redis error handling, you can stop the Redis service:
+
+```bash
+# Stop Redis service
+sudo systemctl stop redis-server  # Linux
+brew services stop redis          # macOS
+
+# Your application will continue to work, fetching data from the database
+```
 
 ## Contribution Guidelines
 

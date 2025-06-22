@@ -1,5 +1,6 @@
 package com.url.shortener.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -24,5 +25,6 @@ public class UrlMapping {
     private User user;
 
     @OneToMany(mappedBy = "urlMapping")
+    @JsonManagedReference
     private List<ClickEvent> clickEvents;
 }

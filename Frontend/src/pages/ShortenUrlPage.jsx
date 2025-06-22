@@ -7,6 +7,7 @@ const ShortenUrlPage = () => {
     const { url } = useParams();
     const [isLoading, setIsLoading] = useState(true);
     const [urlNotFound, setUrlNotFound] = useState(false);
+    const [errorType, setErrorType] = useState('not_found'); // 'not_found' | 'service_error'
 
     useEffect(() => {
         console.log("Checking URL:", url);
@@ -26,23 +27,29 @@ const ShortenUrlPage = () => {
                 // URL exists, redirect to the backend endpoint which will handle the actual redirect
                 window.location.href = import.meta.env.VITE_BACKEND_URL + `/${shortUrl}`;
             } else {
+                setErrorType('not_found');
                 setUrlNotFound(true);
                 setIsLoading(false);
             }
         } catch (error) {
-            console.log("URL not found:", error);
+            console.log("URL check error:", error);
+
             if (error.response && error.response.status === 404) {
-                setUrlNotFound(true);
+                setErrorType('not_found');
+            } else if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
+                setErrorType('service_error');
             } else {
-                // For other errors, also show URL not found
-                setUrlNotFound(true);
+                // For other errors, also show URL not found but with different message
+                setErrorType('service_error');
             }
+
+            setUrlNotFound(true);
             setIsLoading(false);
         }
     };
 
     if (urlNotFound) {
-        return <NoUrlFoundPage />;
+        return <NoUrlFoundPage errorType={errorType} />;
     }
 
     if (isLoading) {

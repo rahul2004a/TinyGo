@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +30,9 @@ import java.util.zip.CRC32;
 
 @Service
 public class UrlMappingService implements Serializable {
+
+    private static final Logger logger = LoggerFactory.getLogger(UrlMappingService.class);
+
     @Autowired
     private UrlMappingRepository urlMappingRepository;
 
@@ -41,13 +46,32 @@ public class UrlMappingService implements Serializable {
     private ObjectMapper objectMapper;
 
     private static final String URL_CACHE_PREFIX = "shorturl:";
-    private static final int CLICK_DEDUP_WINDOW_SECONDS = 5; // 5 seconds deduplication window
+    private static final int CLICK_DEDUP_WINDOW_SECONDS = 5;
 
     private static final String BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final int BASE = BASE62_ALPHABET.length();
 
-    // Map to track recent clicks for deduplication - in memory for performance
     private final Map<String, LocalDateTime> recentClicks = new ConcurrentHashMap<>();
+
+    private boolean isRedisAvailable() {
+        try {
+            redisTemplate.opsForValue().get("redis_health_check");
+            return true;
+        } catch (Exception e) {
+            logger.debug("Redis availability check failed: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean safeRedisOperation(Runnable operation, String failureMessage) {
+        try {
+            operation.run();
+            return true;
+        } catch (Exception e) {
+            logger.warn("{}: {}", failureMessage, e.getMessage());
+            return false;
+        }
+    }
 
     @Transactional
     public UrlMappingDTO createShortUrl(String originalUrl, User user) {
@@ -59,9 +83,31 @@ public class UrlMappingService implements Serializable {
         urlMapping.setUser(user);
         urlMapping.setLocalDate(LocalDateTime.now());
 
-        redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, urlMapping, 1, TimeUnit.DAYS);
+        UrlMapping savedUrlMapping;
 
-        UrlMapping savedUrlMapping = urlMappingRepository.save(urlMapping);
+        if (isRedisAvailable()) {
+            // Store in Redis first, then save to database
+            boolean redisCacheSuccess = safeRedisOperation(
+                    () -> redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, urlMapping, 1, TimeUnit.DAYS),
+                    "Failed to cache URL mapping for short URL: " + shortUrl);
+
+            if (redisCacheSuccess) {
+                logger.info("Successfully cached URL mapping in Redis first for short URL: {}", shortUrl);
+            }
+
+            savedUrlMapping = urlMappingRepository.save(urlMapping);
+
+            if (redisCacheSuccess) {
+                safeRedisOperation(
+                        () -> redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, savedUrlMapping, 1,
+                                TimeUnit.DAYS),
+                        "Failed to update Redis cache with saved URL mapping for short URL: " + shortUrl);
+            }
+        } else {
+            logger.info("Redis is not available. Saving directly to database for short URL: {}", shortUrl);
+            savedUrlMapping = urlMappingRepository.save(urlMapping);
+        }
+
         return convertToDto(savedUrlMapping);
     }
 
@@ -99,7 +145,6 @@ public class UrlMappingService implements Serializable {
         crc32.update(input.getBytes());
         long crcValue = crc32.getValue();
 
-        // Convert to positive value and encode in Base62
         return encodeBase62(Math.abs(crcValue));
     }
 
@@ -154,61 +199,125 @@ public class UrlMappingService implements Serializable {
 
     @Transactional
     public UrlMapping getOriginalUrl(String shortUrl) {
-        Object cached = redisTemplate.opsForValue().get(URL_CACHE_PREFIX + shortUrl);
+        boolean redisAvailable = isRedisAvailable();
 
-        UrlMapping urlMapping = null;
-        if (cached instanceof UrlMapping) {
-            urlMapping = (UrlMapping) cached;
-        } else if (cached instanceof LinkedHashMap) {
-            urlMapping = objectMapper.convertValue(cached, UrlMapping.class);
-        }
+        if (redisAvailable) {
+            try {
+                Object cached = redisTemplate.opsForValue().get(URL_CACHE_PREFIX + shortUrl);
+                logger.debug("Checking Redis cache for shortUrl: {}, cached object: {}", shortUrl,
+                        cached != null ? cached.getClass().getSimpleName() : "null");
 
-        if (urlMapping != null) {
-            if (urlMapping.getId() == null) {
-                urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
-                if (urlMapping == null) {
-                    return null;
+                UrlMapping cachedUrlMapping = null;
+                if (cached instanceof UrlMapping) {
+                    cachedUrlMapping = (UrlMapping) cached;
+                    logger.debug("Found UrlMapping in cache for shortUrl: {}", shortUrl);
+                } else if (cached instanceof LinkedHashMap) {
+                    cachedUrlMapping = objectMapper.convertValue(cached, UrlMapping.class);
+                    logger.debug("Found LinkedHashMap in cache for shortUrl: {}, converted to UrlMapping", shortUrl);
                 }
-            } else {
-                urlMapping = urlMappingRepository.findById(urlMapping.getId())
-                        .orElse(null);
-                if (urlMapping == null) {
-                    return null;
+
+                if (cachedUrlMapping != null) {
+                    UrlMapping validatedUrlMapping;
+                    if (cachedUrlMapping.getId() == null) {
+                        validatedUrlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+                        if (validatedUrlMapping == null) {
+                            logger.warn("URL mapping found in cache but not in database for shortUrl: {}", shortUrl);
+                            return null;
+                        }
+                    } else {
+                        Long cachedId = cachedUrlMapping.getId();
+                        validatedUrlMapping = urlMappingRepository.findById(cachedUrlMapping.getId())
+                                .orElse(null);
+                        if (validatedUrlMapping == null) {
+                            logger.warn(
+                                    "URL mapping found in cache but database record with ID {} not found for shortUrl: {}",
+                                    cachedId, shortUrl);
+                            return null;
+                        }
+                    }
+
+                    recordClickAsync(validatedUrlMapping);
+                    logger.info("Successfully retrieved URL from cache for shortUrl: {}", shortUrl);
+                    return validatedUrlMapping;
                 }
+            } catch (Exception e) {
+                logger.warn("Redis operation failed while retrieving URL '{}'. Falling back to database. Error: {}",
+                        shortUrl, e.getMessage());
+                redisAvailable = false;
             }
-
-            recordClickAsync(urlMapping);
-
-            return urlMapping;
+        } else {
+            logger.info("Redis is not available. Using database directly for shortUrl: {}", shortUrl);
         }
 
-        urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+        logger.debug("Cache miss or Redis unavailable for shortUrl: {}, querying database", shortUrl);
+        UrlMapping urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
         if (urlMapping != null) {
+            logger.info("Successfully retrieved URL from database for shortUrl: {}", shortUrl);
             recordClickAsync(urlMapping);
-            redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, urlMapping, 1, TimeUnit.DAYS);
+
+            if (redisAvailable) {
+                final UrlMapping finalUrlMapping = urlMapping;
+                safeRedisOperation(
+                        () -> redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, finalUrlMapping, 1,
+                                TimeUnit.DAYS),
+                        "Failed to cache URL mapping from database for shortUrl: " + shortUrl);
+            }
+        } else {
+            logger.info("URL mapping not found in database for shortUrl: {}", shortUrl);
         }
         return urlMapping;
     }
 
     public UrlMapping checkOriginalUrl(String shortUrl) {
-        Object cached = redisTemplate.opsForValue().get(URL_CACHE_PREFIX + shortUrl);
+        boolean redisAvailable = isRedisAvailable();
 
-        UrlMapping urlMapping = null;
-        if (cached instanceof UrlMapping) {
-            urlMapping = (UrlMapping) cached;
-        } else if (cached instanceof LinkedHashMap) {
-            urlMapping = objectMapper.convertValue(cached, UrlMapping.class);
-        }
+        if (redisAvailable) {
+            try {
+                Object cached = redisTemplate.opsForValue().get(URL_CACHE_PREFIX + shortUrl);
 
-        if (urlMapping != null) {
-            if (urlMapping.getId() == null) {
-                urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
-            } else {
-                urlMapping = urlMappingRepository.findById(urlMapping.getId())
-                        .orElse(null);
+                UrlMapping cachedUrlMapping = null;
+                if (cached instanceof UrlMapping) {
+                    cachedUrlMapping = (UrlMapping) cached;
+                } else if (cached instanceof LinkedHashMap) {
+                    cachedUrlMapping = objectMapper.convertValue(cached, UrlMapping.class);
+                }
+
+                if (cachedUrlMapping != null) {
+                    UrlMapping validatedUrlMapping;
+                    if (cachedUrlMapping.getId() == null) {
+                        validatedUrlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+                    } else {
+                        validatedUrlMapping = urlMappingRepository.findById(cachedUrlMapping.getId())
+                                .orElse(null);
+                    }
+
+                    if (validatedUrlMapping != null) {
+                        final UrlMapping finalUrlMapping = validatedUrlMapping;
+                        safeRedisOperation(
+                                () -> redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, finalUrlMapping, 1,
+                                        TimeUnit.DAYS),
+                                "Failed to update cache for URL: " + shortUrl);
+                    }
+
+                    return validatedUrlMapping;
+                }
+            } catch (Exception e) {
+                logger.warn("Redis connection failed while checking URL '{}'. Falling back to database. Error: {}",
+                        shortUrl, e.getMessage());
+                redisAvailable = false;
             }
         } else {
-            urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+            logger.info("Redis is not available. Using database directly for shortUrl: {}", shortUrl);
+        }
+
+        UrlMapping urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+
+        if (redisAvailable && urlMapping != null) {
+            final UrlMapping finalUrlMapping = urlMapping;
+            safeRedisOperation(
+                    () -> redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, finalUrlMapping, 1,
+                            TimeUnit.DAYS),
+                    "Failed to cache URL mapping from database for shortUrl: " + shortUrl);
         }
 
         return urlMapping;
@@ -219,23 +328,18 @@ public class UrlMappingService implements Serializable {
         String clickKey = urlMapping.getShortUrl();
         LocalDateTime now = LocalDateTime.now();
 
-        // Check if this is a duplicate click within the deduplication window
         synchronized (recentClicks) {
             LocalDateTime lastClick = recentClicks.get(clickKey);
             if (lastClick != null && now.isBefore(lastClick.plusSeconds(CLICK_DEDUP_WINDOW_SECONDS))) {
-                // This is a duplicate click, ignore it
                 return CompletableFuture.completedFuture(null);
             }
 
-            // Record this click
             recentClicks.put(clickKey, now);
 
-            // Clean up old entries to prevent memory leak
             recentClicks.entrySet()
                     .removeIf(entry -> now.isAfter(entry.getValue().plusSeconds(CLICK_DEDUP_WINDOW_SECONDS * 2)));
         }
 
-        // Record the click
         urlMapping.setClickCount(urlMapping.getClickCount() + 1);
         urlMappingRepository.save(urlMapping);
 

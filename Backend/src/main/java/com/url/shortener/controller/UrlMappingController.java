@@ -7,12 +7,19 @@ import com.url.shortener.models.User;
 import com.url.shortener.service.RateLimiterService;
 import com.url.shortener.service.UrlMappingService;
 import com.url.shortener.service.UserService;
-import lombok.AllArgsConstructor;
+import com.url.shortener.service.QRCodeService;
+import com.google.zxing.WriterException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,8 +29,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/urls")
-@AllArgsConstructor
 public class UrlMappingController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UrlMappingController.class);
+
+    @Value("${app.domain}")
+    private static final String DOMAIN = "";
 
     @Autowired
     private UrlMappingService urlMappingService;
@@ -33,6 +44,9 @@ public class UrlMappingController {
 
     @Autowired
     private RateLimiterService rateLimiterService;
+
+    @Autowired
+    private QRCodeService qrCodeService;
 
     @PostMapping("/shorten")
     @PreAuthorize("hasRole('USER')")
@@ -90,8 +104,14 @@ public class UrlMappingController {
 
     @GetMapping("/check/{shortUrl}")
     public ResponseEntity<Map<String, Boolean>> checkUrlExists(@PathVariable String shortUrl) {
-        boolean exists = urlMappingService.getOriginalUrl(shortUrl) != null;
-        return ResponseEntity.ok(Map.of("exists", exists));
+        try {
+            boolean exists = urlMappingService.checkOriginalUrl(shortUrl) != null;
+            return ResponseEntity.ok(Map.of("exists", exists));
+        } catch (Exception e) {
+            // Log the error and return false for URL existence
+            logger.error("Error checking URL existence for '{}': {}", shortUrl, e.getMessage());
+            return ResponseEntity.ok(Map.of("exists", false));
+        }
     }
 
     @GetMapping("/rate-limit-status")
@@ -122,6 +142,30 @@ public class UrlMappingController {
                 "message", "Rate limit reset successfully for user: " + username,
                 "username", username,
                 "resetTime", LocalDateTime.now().toString()));
+    }
+
+    @GetMapping(value = "/qr-code/{shortUrl}", produces = MediaType.IMAGE_PNG_VALUE)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<byte[]> getQRCode(@PathVariable String shortUrl) throws WriterException, IOException {
+        // Get the full URL for the QR code
+        String fullUrl = DOMAIN + shortUrl; // You can adjust this domain
+        byte[] qrCodeImage = qrCodeService.generateQRCodeImage(fullUrl, 300, 300);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_PNG);
+        headers.setContentDispositionFormData("attachment", shortUrl + "_qr.png");
+        return ResponseEntity.ok().headers(headers).body(qrCodeImage);
+    }
+
+    @GetMapping(value = "/qr-code/{shortUrl}/download", produces = MediaType.IMAGE_PNG_VALUE)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<byte[]> downloadQRCode(@PathVariable String shortUrl) throws WriterException, IOException {
+        // Get the full URL for the QR code
+        String fullUrl = DOMAIN + shortUrl; // You can adjust this domain
+        byte[] qrCodeImage = qrCodeService.generateQRCodeImage(fullUrl, 300, 300);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_PNG);
+        headers.setContentDispositionFormData("attachment", "tinygo_" + shortUrl + "_qr.png");
+        return ResponseEntity.ok().headers(headers).body(qrCodeImage);
     }
 
 }
