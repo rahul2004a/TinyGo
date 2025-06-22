@@ -10,6 +10,7 @@ import ErrorPage from './pages/ErrorPage';
 import RegisterPage from './pages/Register';
 import LandingPage from './pages/LandingPage';
 import ShortenUrlPage from './pages/ShortenUrlPage';
+import NoUrlFoundPage from './pages/NoUrlFoundPage';
 import DashboardLayout from './pages/Dashboard/DashboardLayout';
 
 
@@ -99,8 +100,9 @@ const AppRouter = () => {
                     </PrivateRoute>
                 } />
                 <Route path="/error" element={<ErrorPage />} />
-                <Route path='/*' element={<ErrorPage message="We can't seem to find the page you're looking for" />} />
+                <Route path="/url-not-found" element={<NoUrlFoundPage />} />
                 <Route path="/:url" element={<ShortenUrlPage />} />
+                <Route path='*' element={<ErrorPage message="We can't seem to find the page you're looking for" />} />
             </Routes>
             {!isRedirectRoute && <Footer />}
         </>
